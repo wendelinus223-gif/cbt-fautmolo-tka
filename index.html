@@ -14,6 +14,9 @@
         .btn-primary { background: #1e40af; color: white; font-weight: 700; padding: 12px 24px; border-radius: 12px; transition: 0.3s; }
         .btn-primary:hover { background: #1e3a8a; transform: translateY(-2px); }
         .owner-badge { background: linear-gradient(135deg, #1e293b 0%, #334155 100%); color: #f1f5f9; padding: 10px 20px; border-radius: 50px; font-size: 11px; font-weight: 800; letter-spacing: 1px; display: inline-block; }
+        .badge-sesi { padding: 4px 12px; border-radius: 8px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+        .bg-literasi { background: #dcfce7; color: #166534; }
+        .bg-numerasi { background: #fef9c3; color: #854d0e; }
         .selected-match { background-color: #dbeafe !important; border-color: #2563eb !important; }
         .paired-match { background-color: #f0fdf4 !important; border-color: #22c55e !important; color: #15803d !important; }
     </style>
@@ -53,12 +56,26 @@
 
     <main class="max-w-7xl mx-auto p-6">
         <div id="superAdminSection" class="hidden space-y-8">
-            <div class="bg-blue-600 rounded-3xl p-8 text-white shadow-xl">
-                <h2 class="text-2xl font-bold italic">"Selamat Bekerja, Pak Wendelinus"</h2>
-                <p class="mt-1 text-blue-100 text-sm italic">Pemilik & Pengontrol Sistem CBT Kecamatan Fautmolo</p>
+            <div class="glass p-8 border-l-8 border-purple-600 shadow-xl bg-purple-50">
+                <h3 class="font-black mb-4 text-purple-800 uppercase text-sm tracking-widest">Pusat Kendali Sesi Ujian (Kecamatan)</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                    <div>
+                        <p class="text-xs text-purple-600 font-bold mb-2 uppercase">Pilih Sesi Yang Akan Dikerjakan Seluruh Siswa Hari Ini:</p>
+                        <select id="admin_set_sesi" onchange="updateSesiNasional(this.value)" class="font-black text-lg text-purple-900 border-purple-300">
+                            <option value="NONAKTIF">-- UJIAN DINONAKTIFKAN --</option>
+                            <option value="LITERASI">HARI 1: LITERASI</option>
+                            <option value="NUMERASI">HARI 2: NUMERASI</option>
+                        </select>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl border border-purple-200">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase">Status Saat Ini:</p>
+                        <div id="statusSesiSekarang" class="text-xl font-black text-purple-600">MEMUAT...</div>
+                    </div>
+                </div>
             </div>
+
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div class="glass p-8 shadow-sm">
+                <div class="glass p-8">
                     <h3 class="font-black mb-6 text-slate-700 text-sm tracking-widest uppercase">🔑 Manajemen Proktor</h3>
                     <div class="space-y-3 mb-6">
                         <input type="text" id="p_sekolah" placeholder="Nama Lembaga/Sekolah">
@@ -66,11 +83,9 @@
                         <input type="text" id="p_pass" placeholder="Password">
                         <button onclick="tambahProktor()" id="btnProktor" class="w-full btn-primary text-xs uppercase">Daftarkan Proktor</button>
                     </div>
-                    <div class="overflow-hidden border rounded-xl">
+                    <div class="overflow-x-auto border rounded-xl">
                         <table class="w-full text-xs text-left">
-                            <thead class="bg-slate-100">
-                                <tr><th class="p-3">Sekolah</th><th class="p-3">User</th><th class="p-3 text-center">Aksi</th></tr>
-                            </thead>
+                            <thead class="bg-slate-100"><tr><th class="p-3">Sekolah</th><th class="p-3">Aksi</th></tr></thead>
                             <tbody id="listProktorTable"></tbody>
                         </table>
                     </div>
@@ -78,6 +93,10 @@
                 <div class="glass p-8">
                     <h3 class="font-black mb-6 text-slate-700 text-sm tracking-widest uppercase">📝 Bank Soal</h3>
                     <div class="space-y-3">
+                        <select id="q_kategori">
+                            <option value="LITERASI">KATEGORI: LITERASI</option>
+                            <option value="NUMERASI">KATEGORI: NUMERASI</option>
+                        </select>
                         <textarea id="q_tanya" rows="2" placeholder="Teks Pertanyaan..."></textarea>
                         <div class="grid grid-cols-2 gap-2 text-xs">
                             <input type="text" id="q_a" placeholder="Opsi A">
@@ -85,51 +104,34 @@
                             <input type="text" id="q_c" placeholder="Opsi C">
                             <input type="text" id="q_d" placeholder="Opsi D">
                         </div>
-                        <input type="text" id="q_kunci" placeholder="Kunci (A / AC / MATCH)">
-                        <button onclick="tambahSoal()" class="w-full bg-purple-600 text-white font-bold py-3 rounded-xl uppercase text-xs">Simpan Soal</button>
+                        <input type="text" id="q_kunci" placeholder="Kunci (A / MATCH)">
+                        <button onclick="tambahSoal()" class="w-full bg-purple-600 text-white font-bold py-3 rounded-xl uppercase text-xs">Simpan ke Bank Soal</button>
                     </div>
                 </div>
             </div>
         </div>
 
         <div id="proktorSection" class="hidden space-y-6">
-            <div class="glass p-8 border-t-4 border-blue-600 shadow-sm">
-                <div class="flex items-center gap-3 mb-6">
-                    <div class="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-lg">🏫</div>
-                    <h3 class="font-black text-slate-700 uppercase tracking-widest text-sm">Identitas Kepala Sekolah</h3>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="md:col-span-2">
-                        <input type="text" id="s_kepsek" placeholder="Nama Lengkap Kepala Sekolah (beserta gelar)...">
-                    </div>
-                    <button onclick="simpanKepsek()" class="w-full bg-slate-800 text-white font-bold py-3 rounded-xl uppercase text-[10px] tracking-widest hover:bg-black transition">Update Identitas</button>
+            <div class="glass p-8 border-t-4 border-blue-600">
+                <h3 class="font-black mb-4 text-slate-700 uppercase text-xs tracking-widest">🏫 Identitas Kepala Sekolah</h3>
+                <div class="flex gap-3">
+                    <input type="text" id="s_kepsek" placeholder="Nama Kepala Sekolah...">
+                    <button onclick="simpanKepsek()" class="bg-slate-800 text-white px-6 py-2 rounded-xl text-[10px] font-bold uppercase">Simpan</button>
                 </div>
             </div>
-
-            <div class="glass p-8 shadow-sm">
-                <h3 class="font-black mb-6 text-slate-700 uppercase tracking-widest text-sm">Daftarkan Peserta Ujian</h3>
+            
+            <div class="glass p-8">
+                <h3 class="font-black mb-6 text-slate-700 uppercase text-xs tracking-widest">👥 Manajemen Siswa</h3>
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-6">
                     <input type="text" id="s_no" placeholder="No. Peserta">
-                    <input type="text" id="s_nama" placeholder="Nama Lengkap Siswa">
+                    <input type="text" id="s_nama" placeholder="Nama Siswa">
                     <input type="text" id="s_pass" placeholder="Password">
-                    <button onclick="tambahSiswa()" id="btnTambahSiswa" class="btn-primary text-[10px] uppercase font-black">Tambah/Update</button>
+                    <button onclick="tambahSiswa()" class="btn-primary text-[10px] uppercase">Daftarkan</button>
                 </div>
-                <div class="overflow-hidden rounded-xl border">
+                <div class="overflow-hidden border rounded-xl">
                     <table class="w-full text-sm text-left">
-                        <thead class="bg-slate-50 text-slate-400 uppercase text-[10px] font-black">
-                            <tr><th class="p-4">No. Peserta</th><th class="p-4">Nama</th><th class="p-4 text-center">Aksi</th></tr>
-                        </thead>
-                        <tbody id="listSiswaTable" class="divide-y"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div class="glass p-8 shadow-sm">
-                <h3 class="font-black mb-6 text-blue-600 uppercase tracking-widest text-sm">Monitoring & Hasil Ujian</h3>
-                <div class="overflow-hidden rounded-xl border">
-                    <table class="w-full text-sm text-left">
-                        <thead class="bg-blue-50 text-blue-400 uppercase text-[10px] font-black">
-                            <tr><th class="p-4">Nama Siswa</th><th class="p-4 text-center">Status</th><th class="p-4 text-center">Skor</th></tr>
+                        <thead class="bg-slate-50 text-[10px] font-black uppercase">
+                            <tr><th class="p-4">Nama</th><th class="p-4 text-center">Sesi</th><th class="p-4 text-center">Status</th><th class="p-4 text-center">Skor</th></tr>
                         </thead>
                         <tbody id="riwayatSkorTable" class="divide-y"></tbody>
                     </table>
@@ -138,13 +140,19 @@
         </div>
 
         <div id="siswaSection" class="hidden">
+            <div id="areaTunggu" class="hidden glass p-16 text-center max-w-lg mx-auto">
+                <div class="text-5xl mb-6">📢</div>
+                <h2 class="text-2xl font-black text-slate-800 uppercase">Ujian Belum Dimulai</h2>
+                <p class="text-slate-500 mt-2">Admin belum mengaktifkan sesi ujian untuk hari ini. Silakan tunggu informasi selanjutnya.</p>
+            </div>
             <div id="areaUjian" class="max-w-3xl mx-auto space-y-6">
                 <div id="containerSoal"></div>
             </div>
             <div id="areaSelesai" class="hidden text-center glass p-16 max-w-md mx-auto">
-                <h2 class="text-3xl font-black text-slate-800 mb-2 uppercase">Selesai</h2>
+                <h2 class="text-3xl font-black text-slate-800 mb-2 uppercase">Terima Kasih</h2>
+                <p id="pesanSelesai" class="text-slate-500 mb-6"></p>
                 <div class="text-7xl font-black text-blue-600 mb-8" id="skorAkhir">0</div>
-                <button onclick="location.reload()" class="btn-primary w-full">KEMBALI KE BERANDA</button>
+                <button onclick="location.reload()" class="btn-primary w-full">KELUAR</button>
             </div>
         </div>
     </main>
@@ -166,16 +174,18 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
 let userLogin = null;
-let currentEditId = null;
-let currentProktorId = null;
-let selectedKiri = null;
+let sesiAktifNasional = "NONAKTIF";
+let soalUjian = [];
+let totalSkorBenar = 0;
 let pasanganSiswa = {};
+let selectedKiri = null;
 
 // LOGIN
 window.prosesLogin = async () => {
     const u = document.getElementById("l_user").value.toUpperCase();
     const p = document.getElementById("l_pass").value;
-    if(u === 'AMADEO' && p === 'FAUTMOLO2026') return renderDashboard({ nama: "WENDELINUS", role: "super_admin", sekolah: "KECAMATAN FAUTMOLO" });
+    
+    if(u === 'AMADEO' && p === 'FAUTMOLO2026') return renderDashboard({ nama: "WENDELINUS", role: "super_admin", sekolah: "PUSAT" });
     
     const proSnap = await get(ref(db, "proktor_tka"));
     let pData = Object.entries(proSnap.val() || {}).find(([k,v]) => v.userID === u && v.password === p);
@@ -184,7 +194,7 @@ window.prosesLogin = async () => {
     const sisSnap = await get(ref(db, "siswa_tka"));
     let sData = Object.entries(sisSnap.val() || {}).find(([k,v]) => v.noPeserta === u && v.password === p);
     if(sData) return renderDashboard({...sData[1], role: 'siswa', dbId: sData[0]});
-    alert("Maaf, Login Gagal!");
+    alert("User tidak ditemukan!");
 }
 
 function renderDashboard(data) {
@@ -194,149 +204,165 @@ function renderDashboard(data) {
     document.getElementById("userNama").innerText = data.nama;
     document.getElementById("displaySekolah").innerText = data.sekolah;
 
+    // Sinkronisasi Sesi Nasional
+    onValue(ref(db, "pengaturan_pusat/sesi_aktif"), (snap) => {
+        sesiAktifNasional = snap.val() || "NONAKTIF";
+        if(document.getElementById("statusSesiSekarang")) {
+            document.getElementById("statusSesiSekarang").innerText = sesiAktifNasional;
+            document.getElementById("admin_set_sesi").value = sesiAktifNasional;
+        }
+        
+        // Jika sedang login sebagai siswa, cek ulang tampilan
+        if(userLogin.role === 'siswa') cekSesiSiswa();
+        if(userLogin.role === 'proktor') loadProktorData();
+    });
+
     if(data.role === 'super_admin') {
         document.getElementById("superAdminSection").classList.remove("hidden");
         loadProktorList();
-    } else if(data.role === 'proktor') { 
-        document.getElementById("proktorSection").classList.remove("hidden"); 
-        loadProktorData();
-        // Memuat Nama Kepala Sekolah
+    } else if(data.role === 'proktor') {
+        document.getElementById("proktorSection").classList.remove("hidden");
         onValue(ref(db, `info_sekolah/${userLogin.sekolah}`), s => {
-            if(s.exists()) document.getElementById("s_kepsek").value = s.val().kepalaSekolah;
+            if(s.exists()) document.getElementById("s_kepsek").value = s.val().kepalaSekolah || "";
         });
-    } else { 
-        document.getElementById("siswaSection").classList.remove("hidden"); 
-        mulaiUjian(); 
+    } else {
+        document.getElementById("siswaSection").classList.remove("hidden");
     }
 }
 
-// FUNGSI SIMPAN KEPALA SEKOLAH
-window.simpanKepsek = () => {
-    const n = document.getElementById("s_kepsek").value.toUpperCase();
-    if(!n) return alert("Ketik nama kepala sekolah!");
-    set(ref(db, `info_sekolah/${userLogin.sekolah}`), { kepalaSekolah: n }).then(() => {
-        alert("✅ Berhasil! Nama Kepala Sekolah " + userLogin.sekolah + " telah diperbarui.");
+// ADMIN ONLY: UPDATE SESI NASIONAL
+window.updateSesiNasional = (val) => {
+    set(ref(db, "pengaturan_pusat/sesi_aktif"), val).then(() => {
+        alert("✅ PERHATIAN: Seluruh sistem sekarang beralih ke sesi " + val);
     });
 }
 
-// ADMIN: MANAJEMEN PROKTOR
-window.tambahProktor = () => {
-    const s = document.getElementById("p_sekolah").value.toUpperCase();
-    const u = document.getElementById("p_user").value.toUpperCase();
-    const p = document.getElementById("p_pass").value;
-    if(!s || !u || !p) return alert("Lengkapi data!");
-    const data = { sekolah: s, userID: u, password: p, nama: "PROKTOR " + s };
-
-    if(currentProktorId) {
-        update(ref(db, `proktor_tka/${currentProktorId}`), data).then(() => {
-            alert("✅ Notifikasi: Data Proktor Berhasil Diperbarui!");
-            resetAdminForm();
-        });
+// SISWA: LOGIKA OTOMATIS BERDASARKAN SESI ADMIN
+async function cekSesiSiswa() {
+    if(sesiAktifNasional === "NONAKTIF") {
+        document.getElementById("areaTunggu").classList.remove("hidden");
+        document.getElementById("areaUjian").classList.add("hidden");
+        document.getElementById("areaSelesai").classList.add("hidden");
     } else {
-        push(ref(db, "proktor_tka"), data).then(() => {
-            alert("✅ Notifikasi: Proktor Baru Berhasil Didaftarkan!");
-            resetAdminForm();
-        });
+        const fieldSelesai = sesiAktifNasional === "LITERASI" ? 'selesaiL' : 'selesaiN';
+        
+        // Ambil data terbaru siswa untuk cek status selesai
+        const freshSnap = await get(ref(db, `siswa_tka/${userLogin.dbId}`));
+        const freshData = freshSnap.val();
+
+        if(freshData[fieldSelesai]) {
+            tampilkanSkorSelesai(freshData[sesiAktifNasional === "LITERASI" ? 'nilaiL' : 'nilaiN']);
+        } else {
+            document.getElementById("areaTunggu").classList.add("hidden");
+            document.getElementById("areaSelesai").classList.add("hidden");
+            document.getElementById("areaUjian").classList.remove("hidden");
+            loadSoalSesi(sesiAktifNasional);
+        }
     }
 }
 
+async function loadSoalSesi(sesi) {
+    const snap = await get(ref(db, "bank_soal"));
+    const all = Object.values(snap.val() || {});
+    soalUjian = all.filter(s => s.kategori === sesi);
+    totalSkorBenar = 0;
+    if(soalUjian.length > 0) renderSoal(0);
+    else document.getElementById("containerSoal").innerHTML = "<p class='text-center font-bold'>Soal belum tersedia di Bank Soal.</p>";
+}
+
+function renderSoal(idx) {
+    if(idx >= soalUjian.length) {
+        const skor = Math.round((totalSkorBenar / soalUjian.length) * 100);
+        const updates = {};
+        if(sesiAktifNasional === "LITERASI") {
+            updates[`nilaiL`] = skor; updates[`selesaiL`] = true;
+        } else {
+            updates[`nilaiN`] = skor; updates[`selesaiN`] = true;
+        }
+        update(ref(db, `siswa_tka/${userLogin.dbId}`), updates);
+        tampilkanSkorSelesai(skor);
+        return;
+    }
+    pasanganSiswa = {}; selectedKiri = null;
+    const q = soalUjian[idx];
+    const container = document.getElementById("containerSoal");
+    const badge = `<span class="badge-sesi ${sesiAktifNasional === 'LITERASI' ? 'bg-literasi' : 'bg-numerasi'}">${sesiAktifNasional}</span>`;
+
+    if (q.kunci === "MATCH") {
+        const kiri = [q.a.split(':')[0], q.b.split(':')[0], q.c.split(':')[0], q.d.split(':')[0]];
+        const kanan = [q.a.split(':')[1], q.b.split(':')[1], q.c.split(':')[1], q.d.split(':')[1]].sort(()=>Math.random()-0.5);
+        container.innerHTML = `<div class="glass p-8 shadow-lg">${badge}<p class="text-lg font-bold my-4">${q.tanya}</p><div class="grid grid-cols-2 gap-4"><div class="space-y-2">${kiri.map(k=>`<div id="L-${k}" onclick="pilihKiri('${k}')" class="p-3 border-2 rounded-xl text-center font-bold bg-white cursor-pointer">${k}</div>`).join('')}</div><div class="space-y-2">${kanan.map(kn=>`<div id="R-${kn}" onclick="pilihKanan('${kn}')" class="p-3 border-2 rounded-xl text-center font-bold bg-white cursor-pointer">${kn}</div>`).join('')}</div></div><button onclick="cekMatch(${idx})" class="w-full mt-6 btn-primary uppercase">Simpan Jawaban</button></div>`;
+    } else {
+        container.innerHTML = `<div class="glass p-8 shadow-lg">${badge}<p class="text-lg font-bold my-4">${q.tanya}</p><div class="space-y-3">${['A','B','C','D'].map(o => `<label class="flex items-center p-4 border-2 rounded-xl cursor-pointer hover:bg-blue-50 transition"><input type="radio" name="ans" value="${o}" class="w-5 h-5"><span class="ml-4 font-bold">${o}. ${q[o.toLowerCase()]}</span></label>`).join('')}</div><button onclick="prosesNormal('${q.kunci}', ${idx})" class="w-full mt-6 btn-primary uppercase">Selanjutnya</button></div>`;
+    }
+}
+
+function tampilkanSkorSelesai(skor) {
+    document.getElementById("areaUjian").classList.add("hidden");
+    document.getElementById("areaSelesai").classList.remove("hidden");
+    document.getElementById("pesanSelesai").innerText = `Anda telah menyelesaikan Sesi ${sesiAktifNasional}`;
+    document.getElementById("skorAkhir").innerText = skor || 0;
+}
+
+// LOGIKA JAWABAN (NORMAL & MATCH)
+window.pilihKiri = (val) => { selectedKiri = val; document.querySelectorAll('[id^="L-"]').forEach(el => el.classList.remove('selected-match')); document.getElementById(`L-${val}`).classList.add('selected-match'); };
+window.pilihKanan = (val) => { if(!selectedKiri) return alert("Pilih kiri dulu!"); pasanganSiswa[selectedKiri] = val; document.getElementById(`L-${selectedKiri}`).classList.add('paired-match'); document.getElementById(`R-${val}`).classList.add('paired-match'); selectedKiri = null; };
+window.cekMatch = (idx) => {
+    const q = soalUjian[idx];
+    const k = { [q.a.split(':')[0]]:q.a.split(':')[1], [q.b.split(':')[0]]:q.b.split(':')[1], [q.c.split(':')[0]]:q.c.split(':')[1], [q.d.split(':')[0]]:q.d.split(':')[1] };
+    let b = true; for(let key in k) if(pasanganSiswa[key] !== k[key]) b = false;
+    if(b) totalSkorBenar++;
+    renderSoal(idx + 1);
+};
+window.prosesNormal = (kunci, idx) => {
+    const terpilih = document.querySelector('input[name="ans"]:checked')?.value;
+    if(!terpilih) return alert("Pilih jawaban!");
+    if(terpilih === kunci) totalSkorBenar++;
+    renderSoal(idx + 1);
+};
+
+// PROKTOR: KEPSEK & SISWA
+window.simpanKepsek = () => {
+    const n = document.getElementById("s_kepsek").value.toUpperCase();
+    set(ref(db, `info_sekolah/${userLogin.sekolah}`), { kepalaSekolah: n }).then(() => alert("Nama Kepsek Disimpan!"));
+}
+window.tambahSiswa = () => {
+    const data = { noPeserta: document.getElementById("s_no").value.toUpperCase(), nama: document.getElementById("s_nama").value.toUpperCase(), password: document.getElementById("s_pass").value, sekolah: userLogin.sekolah, selesaiL: false, selesaiN: false, nilaiL: 0, nilaiN: 0 };
+    push(ref(db, "siswa_tka"), data).then(() => alert("Siswa Berhasil Didaftarkan!"));
+}
+function loadProktorData() {
+    onValue(ref(db, "siswa_tka"), snap => {
+        let h = "";
+        Object.entries(snap.val() || {}).forEach(([k, s]) => {
+            if(s.sekolah === userLogin.sekolah) {
+                const sAktif = sesiAktifNasional === "NUMERASI" ? "NUMERASI" : "LITERASI";
+                const isSelesai = sAktif === "LITERASI" ? s.selesaiL : s.selesaiN;
+                const skor = sAktif === "LITERASI" ? (s.nilaiL || 0) : (s.nilaiN || 0);
+                h += `<tr><td class="p-4 font-bold">${s.nama}</td><td class="p-4 text-center text-[10px] font-bold">${sAktif}</td><td class="p-4 text-center">${isSelesai?'✅':'⏳'}</td><td class="p-4 text-center font-black text-blue-600">${skor}</td></tr>`;
+            }
+        });
+        document.getElementById("riwayatSkorTable").innerHTML = h;
+    });
+}
+
+// SUPER ADMIN: PROKTOR & BANK SOAL
+window.tambahProktor = () => {
+    const data = { sekolah: document.getElementById("p_sekolah").value.toUpperCase(), userID: document.getElementById("p_user").value.toUpperCase(), password: document.getElementById("p_pass").value, nama: "PROKTOR" };
+    push(ref(db, "proktor_tka"), data).then(() => alert("Proktor Terdaftar!"));
+}
 function loadProktorList() {
     onValue(ref(db, "proktor_tka"), snap => {
         let h = "";
         Object.entries(snap.val() || {}).forEach(([id, p]) => {
-            h += `<tr class="border-b"><td class="p-3 font-bold text-slate-700">${p.sekolah}</td><td class="p-3">${p.userID}</td><td class="p-3 text-center">
-                <button onclick="editProktor('${id}','${p.sekolah}','${p.userID}','${p.password}')" class="text-blue-600 font-bold mr-3">EDIT</button>
-                <button onclick="hapusProktor('${id}')" class="text-red-500 font-bold">HAPUS</button>
-            </td></tr>`;
+            h += `<tr class="border-b"><td class="p-3 font-bold">${p.sekolah}</td><td class="p-3"><button onclick="remove(ref(db,'proktor_tka/${id}'))" class="text-red-500 font-bold">HAPUS</button></td></tr>`;
         });
         document.getElementById("listProktorTable").innerHTML = h;
     });
 }
-
-window.editProktor = (id, sek, usr, pas) => {
-    document.getElementById("p_sekolah").value = sek;
-    document.getElementById("p_user").value = usr;
-    document.getElementById("p_pass").value = pas;
-    document.getElementById("btnProktor").innerText = "SIMPAN PERUBAHAN DATA";
-    currentProktorId = id;
+window.tambahSoal = () => {
+    const data = { kategori: document.getElementById("q_kategori").value, tanya: document.getElementById("q_tanya").value, a: document.getElementById("q_a").value, b: document.getElementById("q_b").value, c: document.getElementById("q_c").value, d: document.getElementById("q_d").value, kunci: document.getElementById("q_kunci").value.toUpperCase() };
+    push(ref(db, "bank_soal"), data).then(() => alert("Soal Berhasil Masuk Bank Soal!"));
 }
-
-window.hapusProktor = (id) => { if(confirm("Hapus akun proktor ini?")) remove(ref(db, `proktor_tka/${id}`)); }
-
-function resetAdminForm() {
-    currentProktorId = null;
-    document.getElementById("p_sekolah").value = "";
-    document.getElementById("p_user").value = "";
-    document.getElementById("p_pass").value = "";
-    document.getElementById("btnProktor").innerText = "DAFTARKAN PROKTOR";
-}
-
-// PROKTOR: MANAJEMEN SISWA
-window.tambahSiswa = () => {
-    const data = { 
-        noPeserta: document.getElementById("s_no").value.toUpperCase(),
-        nama: document.getElementById("s_nama").value.toUpperCase(),
-        password: document.getElementById("s_pass").value,
-        sekolah: userLogin.sekolah, sudahUjian: false, nilai: 0 
-    };
-    if(currentEditId) update(ref(db, `siswa_tka/${currentEditId}`), data).then(() => { alert("✅ Data Siswa Diupdate!"); resetForm(); });
-    else push(ref(db, "siswa_tka"), data).then(() => { alert("✅ Siswa Terdaftar!"); resetForm(); });
-}
-
-window.editSiswa = (id, no, nm, ps) => {
-    document.getElementById("s_no").value = no; document.getElementById("s_nama").value = nm;
-    document.getElementById("s_pass").value = ps; currentEditId = id;
-}
-
-function loadProktorData() {
-    onValue(ref(db, "siswa_tka"), snap => {
-        let h1 = ""; let h2 = "";
-        Object.entries(snap.val() || {}).forEach(([k, s]) => {
-            if(s.sekolah === userLogin.sekolah) {
-                h1 += `<tr><td class="p-4">${s.noPeserta}</td><td class="p-4 font-semibold">${s.nama}</td><td class="p-4 text-center"><button onclick="editSiswa('${k}','${s.noPeserta}','${s.nama}','${s.password}')" class="bg-blue-100 text-blue-600 px-3 py-1 rounded-lg text-xs font-bold">EDIT</button></td></tr>`;
-                h2 += `<tr><td class="p-4 font-medium">${s.nama}</td><td class="p-4 text-center">${s.sudahUjian?'<span class="text-green-600 font-bold">SELESAI</span>':'<span class="text-orange-400 font-bold">BELUM</span>'}</td><td class="p-4 text-center font-black text-blue-600">${s.nilai}</td></tr>`;
-            }
-        });
-        document.getElementById("listSiswaTable").innerHTML = h1;
-        document.getElementById("riwayatSkorTable").innerHTML = h2;
-    });
-}
-
-function resetForm() { currentEditId = null; document.querySelectorAll('#proktorSection input').forEach(i => i.value=""); }
-
-// SISWA: UJIAN (LOGIKA)
-async function mulaiUjian() {
-    const snap = await get(ref(db, "bank_soal"));
-    const soal = Object.entries(snap.val() || {});
-    renderSoal(soal, 0, 0);
-}
-
-function renderSoal(allSoal, idx, skor) {
-    if(idx >= allSoal.length) {
-        const total = Math.round((skor/allSoal.length)*100);
-        update(ref(db, `siswa_tka/${userLogin.dbId}`), { nilai: total, sudahUjian: true });
-        document.getElementById("areaUjian").classList.add("hidden");
-        document.getElementById("areaSelesai").classList.remove("hidden");
-        document.getElementById("skorAkhir").innerText = total;
-        return;
-    }
-    const [id, q] = allSoal[idx];
-    const container = document.getElementById("containerSoal");
-    if (q.kunci === "MATCH") {
-        const kiri = [q.a.split(':')[0], q.b.split(':')[0], q.c.split(':')[0], q.d.split(':')[0]];
-        const kanan = [q.a.split(':')[1], q.b.split(':')[1], q.c.split(':')[1], q.d.split(':')[1]].sort(()=>Math.random()-0.5);
-        container.innerHTML = `<div class="glass p-8"><p class="text-lg font-bold mb-6">${q.tanya}</p><div class="grid grid-cols-2 gap-4"><div class="space-y-2">${kiri.map(k=>`<div id="L-${k}" onclick="pilihKiri('${k}')" class="p-3 border-2 rounded-xl text-center font-bold bg-white cursor-pointer">${k}</div>`).join('')}</div><div class="space-y-2">${kanan.map(kn=>`<div id="R-${kn}" onclick="pilihKanan('${kn}')" class="p-3 border-2 rounded-xl text-center font-bold bg-white cursor-pointer">${kn}</div>`).join('')}</div></div><button onclick="cekMatch(${idx}, ${skor}, ${JSON.stringify(allSoal).replace(/"/g, '&quot;')})" class="w-full mt-6 btn-primary">SIMPAN & LANJUT</button></div>`;
-    } else {
-        const isMulti = q.kunci.length > 1;
-        container.innerHTML = `<div class="glass p-8"><p class="text-lg font-bold mb-6">${q.tanya}</p><div class="space-y-3">${['A','B','C','D'].map(o => `<label class="flex items-center p-4 border-2 rounded-xl cursor-pointer hover:bg-blue-50 transition"><input type="${isMulti?'checkbox':'radio'}" name="ans" value="${o}" class="w-5 h-5"><span class="ml-4 font-bold">${o}. ${q[o.toLowerCase()]}</span></label>`).join('')}</div><button onclick="prosesNormal('${q.kunci}', ${idx}, ${skor}, ${JSON.stringify(allSoal).replace(/"/g, '&quot;')})" class="w-full mt-6 btn-primary">LANJUT</button></div>`;
-    }
-}
-
-window.pilihKiri = (val) => { selectedKiri = val; document.querySelectorAll('[id^="L-"]').forEach(el => el.classList.remove('selected-match')); document.getElementById(`L-${val}`).classList.add('selected-match'); };
-window.pilihKanan = (val) => { if(!selectedKiri) return alert("Pilih kiri dulu!"); pasanganSiswa[selectedKiri] = val; document.getElementById(`L-${selectedKiri}`).classList.add('paired-match'); document.getElementById(`R-${val}`).classList.add('paired-match'); selectedKiri = null; };
-window.cekMatch = (idx, skor, all) => { const q = all[idx][1]; const k = { [q.a.split(':')[0]]:q.a.split(':')[1], [q.b.split(':')[0]]:q.b.split(':')[1], [q.c.split(':')[0]]:q.c.split(':')[1], [q.d.split(':')[0]]:q.d.split(':')[1] }; let b = true; for(let key in k) if(pasanganSiswa[key] !== k[key]) b = false; if(b) skor++; renderSoal(all, idx+1, skor); };
-window.prosesNormal = (kunci, idx, skor, all) => { const terpilih = Array.from(document.querySelectorAll('input[name="ans"]:checked')).map(e=>e.value).sort().join(''); if(!terpilih) return alert("Pilih jawaban!"); if(terpilih === kunci.split('').sort().join('')) skor++; renderSoal(all, idx+1, skor); };
-window.tambahSoal = () => { push(ref(db, "bank_soal"), { tanya: document.getElementById("q_tanya").value, a: document.getElementById("q_a").value, b: document.getElementById("q_b").value, c: document.getElementById("q_c").value, d: document.getElementById("q_d").value, kunci: document.getElementById("q_kunci").value.toUpperCase() }).then(() => alert("✅ Soal Berhasil Disimpan!")); }
 </script>
 </body>
 </html>
