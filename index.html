@@ -271,11 +271,22 @@ window.simpanKepsek = () => {
 }
 
 window.tambahSiswa = () => {
+    const no = document.getElementById("s_no").value.toUpperCase();
+    const nm = document.getElementById("s_nama").value.toUpperCase();
+    const ps = document.getElementById("s_pass").value;
+    
+    if(!no || !nm || !ps) return alert("Isi semua data siswa!");
+
     push(ref(db, "siswa_tka"), {
-        noPeserta: document.getElementById("s_no").value.toUpperCase(),
-        nama: document.getElementById("s_nama").value.toUpperCase(),
-        password: document.getElementById("s_pass").value,
-        sekolah: userLogin.sekolah
+        noPeserta: no,
+        nama: nm,
+        password: ps,
+        sekolah: userLogin.sekolah,
+        nilai: 0
+    }).then(() => {
+        document.getElementById("s_no").value = "";
+        document.getElementById("s_nama").value = "";
+        document.getElementById("s_pass").value = "";
     });
 }
 
