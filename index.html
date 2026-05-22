@@ -52,7 +52,6 @@
     </nav>
 
     <main class="max-w-7xl mx-auto p-6">
-        
         <div id="superAdminSection" class="hidden space-y-8">
             <div class="bg-blue-600 rounded-3xl p-8 text-white shadow-xl">
                 <h2 class="text-2xl font-bold italic">"Selamat Bekerja, Pak Wendelinus"</h2>
@@ -122,7 +121,7 @@
                     <input type="text" id="s_no" placeholder="No. Peserta">
                     <input type="text" id="s_nama" placeholder="Nama Lengkap">
                     <input type="text" id="s_pass" placeholder="Password">
-                    <button onclick="tambahSiswa()" class="btn-primary text-xs uppercase font-black">Tambah Siswa</button>
+                    <button onclick="tambahSiswa()" id="btnTambahSiswa" class="btn-primary text-xs uppercase font-black">Tambah Siswa</button>
                 </div>
                 
                 <div class="flex gap-2 mb-4">
@@ -178,6 +177,7 @@ const db = getDatabase(app);
 let userLogin = null;
 let dbSoal = [];
 let dbSiswa = [];
+let editSiswaID = null; // Menyimpan ID siswa yang diedit
 
 // LOGIN
 window.prosesLogin = async () => {
@@ -277,17 +277,44 @@ window.tambahSiswa = () => {
     
     if(!no || !nm || !ps) return alert("Isi semua data siswa!");
 
-    push(ref(db, "siswa_tka"), {
+    const payload = {
         noPeserta: no,
         nama: nm,
         password: ps,
         sekolah: userLogin.sekolah,
         nilai: 0
-    }).then(() => {
-        document.getElementById("s_no").value = "";
-        document.getElementById("s_nama").value = "";
-        document.getElementById("s_pass").value = "";
-    });
+    };
+
+    if(editSiswaID) {
+        // Mode Edit Data
+        set(ref(db, `siswa_tka/${editSiswaID}`), payload).then(() => {
+            alert("Data Siswa Berhasil Diperbarui!");
+            resetFormSiswa();
+        });
+    } else {
+        // Mode Tambah Baru
+        push(ref(db, "siswa_tka"), payload).then(() => {
+            alert("Siswa Berhasil Ditambahkan!");
+            resetFormSiswa();
+        });
+    }
+}
+
+function resetFormSiswa() {
+    document.getElementById("s_no").value = "";
+    document.getElementById("s_nama").value = "";
+    document.getElementById("s_pass").value = "";
+    document.getElementById("btnTambahSiswa").innerText = "Tambah Siswa";
+    editSiswaID = null;
+}
+
+window.siapkanEditSiswa = (id, no, nama, pass) => {
+    document.getElementById("s_no").value = no;
+    document.getElementById("s_nama").value = nama;
+    document.getElementById("s_pass").value = pass;
+    document.getElementById("btnTambahSiswa").innerText = "Simpan Perubahan";
+    editSiswaID = id;
+    document.getElementById("s_no").focus();
 }
 
 function loadProktorData() {
@@ -299,7 +326,15 @@ function loadProktorData() {
         Object.entries(snap.val() || {}).forEach(([key, s]) => {
             if(s.sekolah === userLogin.sekolah) {
                 dbSiswa.push(s);
-                h += `<tr><td class="p-4 font-mono font-bold text-xs">${s.noPeserta}</td><td class="p-4 font-black uppercase text-slate-700">${s.nama}</td><td class="p-4"><span class="px-3 py-1 bg-blue-50 text-blue-700 rounded-full font-black text-xs">${s.nilai || '0'}</span></td><td class="p-4 text-center"><button onclick="hapusData('siswa_tka/${key}')" class="text-red-400 font-bold">X</button></td></tr>`;
+                h += `<tr>
+                    <td class="p-4 font-mono font-bold text-xs">${s.noPeserta}</td>
+                    <td class="p-4 font-black uppercase text-slate-700">${s.nama}</td>
+                    <td class="p-4"><span class="px-3 py-1 bg-blue-50 text-blue-700 rounded-full font-black text-xs">${s.nilai || '0'}</span></td>
+                    <td class="p-4 text-center space-x-2">
+                        <button onclick="siapkanEditSiswa('${key}', '${s.noPeserta}', '${s.nama}', '${s.password}')" class="text-blue-500 font-bold" title="Edit">✏️</button>
+                        <button onclick="hapusData('siswa_tka/${key}')" class="text-red-400 font-bold" title="Hapus">X</button>
+                    </td>
+                </tr>`;
             }
         });
         document.getElementById("listSiswaTable").innerHTML = h;
