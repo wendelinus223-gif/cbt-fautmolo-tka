@@ -14,11 +14,13 @@
         .btn-primary { background: #1e40af; color: white; font-weight: 700; padding: 12px 24px; border-radius: 12px; transition: 0.3s; }
         .btn-primary:hover { background: #1e3a8a; transform: translateY(-2px); }
         .owner-badge { background: linear-gradient(135deg, #1e293b 0%, #334155 100%); color: #f1f5f9; padding: 10px 20px; border-radius: 50px; font-size: 11px; font-weight: 800; letter-spacing: 1px; display: inline-block; }
+        @media print { .no-print { display: none; } body { background: white; } #printArea { display: block !important; } }
+        .card-ujian { border: 2px solid #000; padding: 15px; width: 320px; margin: 10px; display: inline-block; vertical-align: top; text-align: left; background: white; font-family: 'Courier New', Courier, monospace; }
     </style>
 </head>
 <body class="min-h-screen">
 
-<div id="loginPage" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#0f172a] p-4">
+<div id="loginPage" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#0f172a] p-4 no-print">
     <div class="glass p-10 w-full max-w-md shadow-2xl text-center relative overflow-hidden">
         <div class="absolute top-0 left-0 w-full h-2 bg-blue-600"></div>
         <h1 class="text-3xl font-black text-slate-800 mb-2">CBT TKA</h1>
@@ -35,17 +37,17 @@
     </div>
 </div>
 
-<div id="mainApp" class="hidden">
-    <nav class="bg-white/80 backdrop-blur-md border-b p-4 sticky top-0 z-40">
+<div id="mainApp" class="hidden no-print">
+    <nav class="bg-white border-b p-4 sticky top-0 z-40">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-lg">F</div>
+                <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white font-black text-xl">F</div>
                 <div>
-                    <span id="displaySekolah" class="font-black text-slate-800 text-lg leading-none">FAUTMOLO</span>
+                    <span id="displaySekolah" class="font-black text-slate-800 text-lg leading-none uppercase">FAUTMOLO</span>
                     <p id="userNama" class="text-[9px] text-blue-600 font-bold uppercase tracking-wider"></p>
                 </div>
             </div>
-            <button onclick="location.reload()" class="bg-slate-100 text-slate-600 px-4 py-2 rounded-xl text-[10px] font-extrabold uppercase">Logout</button>
+            <button onclick="location.reload()" class="bg-slate-100 text-slate-600 px-4 py-2 rounded-xl text-[10px] font-extrabold uppercase hover:bg-red-50 hover:text-red-600 transition">Logout</button>
         </div>
     </nav>
 
@@ -53,27 +55,27 @@
         
         <div id="superAdminSection" class="hidden space-y-8">
             <div class="bg-blue-600 rounded-3xl p-8 text-white shadow-xl">
-                <h2 class="text-2xl font-bold italic italic">"Selamat Bekerja, Pak Wendelinus"</h2>
-                <p class="mt-1 text-blue-100 text-sm">Kelola Proktor dan Bank Soal dalam satu pintu.</p>
+                <h2 class="text-2xl font-bold italic">"Selamat Bekerja, Pak Wendelinus"</h2>
+                <p class="mt-1 text-blue-100 text-sm italic">Pemilik & Pengontrol Sistem CBT Kecamatan Fautmolo</p>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div class="glass p-8">
                     <h3 class="font-black mb-6 text-slate-700 text-sm tracking-widest uppercase">🔑 Manajemen Proktor</h3>
                     <div class="space-y-3 mb-6">
-                        <input type="text" id="p_sekolah" placeholder="Nama Sekolah/Lembaga">
+                        <input type="text" id="p_sekolah" placeholder="Nama Lembaga/Sekolah">
                         <input type="text" id="p_user" placeholder="User ID Login">
                         <input type="text" id="p_pass" placeholder="Password">
-                        <button onclick="tambahProktor()" class="w-full btn-primary text-xs uppercase">Daftarkan Proktor Baru</button>
+                        <button onclick="tambahProktor()" class="w-full btn-primary text-xs uppercase">Daftarkan Proktor</button>
                     </div>
                     <div class="mt-6 border-t pt-4">
-                        <p class="text-[10px] font-black text-slate-400 mb-3 uppercase tracking-widest">Daftar Akun Proktor Aktif:</p>
+                        <p class="text-[10px] font-black text-slate-400 mb-3 uppercase tracking-widest">Daftar Akun Aktif:</p>
                         <div class="overflow-x-auto">
                             <table class="w-full text-[11px] text-left">
-                                <thead class="bg-slate-50 text-slate-500 uppercase">
+                                <thead class="bg-slate-50 text-slate-500 uppercase font-black">
                                     <tr><th class="p-2">Sekolah</th><th class="p-2">User ID</th><th class="p-2">Password</th><th class="p-2">Aksi</th></tr>
                                 </thead>
-                                <tbody id="tableProktorAdmin" class="divide-y divide-slate-100"></tbody>
+                                <tbody id="tableProktorAdmin" class="divide-y divide-slate-100 italic"></tbody>
                             </table>
                         </div>
                     </div>
@@ -83,43 +85,56 @@
                     <h3 class="font-black mb-6 text-slate-700 text-sm tracking-widest uppercase">📝 Bank Soal</h3>
                     <div class="space-y-3">
                         <textarea id="q_tanya" rows="3" placeholder="Teks Pertanyaan..."></textarea>
-                        <input type="text" id="q_img" placeholder="Link Gambar (Opsional)">
-                        <div class="grid grid-cols-2 gap-2">
-                            <input type="text" id="q_a" placeholder="A">
-                            <input type="text" id="q_b" placeholder="B">
-                            <input type="text" id="q_c" placeholder="C">
-                            <input type="text" id="q_d" placeholder="D">
+                        <input type="text" id="q_img" placeholder="Link Gambar Soal (Opsional)">
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            <input type="text" id="q_a" placeholder="Opsi A">
+                            <input type="text" id="q_b" placeholder="Opsi B">
+                            <input type="text" id="q_c" placeholder="Opsi C">
+                            <input type="text" id="q_d" placeholder="Opsi D">
                         </div>
                         <select id="q_kunci">
-                            <option value="">-- Kunci Jawaban --</option>
+                            <option value="">-- Pilih Kunci Jawaban --</option>
                             <option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option>
                         </select>
                         <button onclick="tambahSoal()" class="w-full bg-purple-600 text-white font-bold py-3 rounded-xl hover:bg-purple-700 transition uppercase text-xs">Simpan Soal</button>
                     </div>
                 </div>
             </div>
-
+            
             <div class="glass p-8">
-                <h4 class="text-xs font-black mb-4 text-slate-500 uppercase">Total Soal: <span id="countSoal" class="text-blue-600">0</span></h4>
+                <h4 class="text-xs font-black mb-4 text-slate-500 uppercase tracking-widest">Database Soal Aktif: <span id="countSoal" class="text-blue-600">0</span></h4>
                 <div id="listSoalAdmin" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
             </div>
         </div>
 
         <div id="proktorSection" class="hidden space-y-6">
+            <div class="glass p-8 border-l-8 border-blue-600">
+                <h3 class="font-black mb-4 text-slate-700 uppercase tracking-widest text-sm text-blue-600">Pengaturan Identitas Sekolah</h3>
+                <div class="flex flex-col md:flex-row gap-3">
+                    <input type="text" id="s_kepsek" placeholder="Ketik Nama Kepala Sekolah...">
+                    <button onclick="simpanKepsek()" class="bg-green-600 text-white px-6 py-3 rounded-xl font-bold text-xs uppercase shadow-lg shadow-green-100">SIMPAN NAMA KEPSEK</button>
+                </div>
+            </div>
+
             <div class="glass p-8">
-                <h3 class="font-black mb-6 text-slate-700 uppercase tracking-widest text-sm">Pendaftaran Siswa</h3>
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                <h3 class="font-black mb-6 text-slate-700 uppercase tracking-widest text-sm">Manajemen Siswa</h3>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-6">
                     <input type="text" id="s_no" placeholder="No. Peserta">
                     <input type="text" id="s_nama" placeholder="Nama Lengkap">
                     <input type="text" id="s_pass" placeholder="Password">
-                    <button onclick="tambahSiswa()" class="btn-primary text-xs uppercase font-black">Simpan</button>
+                    <button onclick="tambahSiswa()" class="btn-primary text-xs uppercase font-black">Tambah Siswa</button>
                 </div>
-                <div class="mt-8 overflow-hidden rounded-xl border border-slate-100 shadow-sm">
+                
+                <div class="flex gap-2 mb-4">
+                    <button onclick="cetakKartu()" class="bg-orange-500 text-white px-5 py-3 rounded-xl text-xs font-black uppercase shadow-lg shadow-orange-100 transition hover:bg-orange-600">CETAK KARTU UJIAN</button>
+                </div>
+
+                <div class="overflow-hidden rounded-xl border border-slate-100">
                     <table class="w-full text-sm text-left">
                         <thead class="bg-slate-50 text-slate-400 uppercase text-[10px] font-black">
-                            <tr><th class="p-4">No. Peserta</th><th class="p-4">Nama Siswa</th><th class="p-4">Nilai</th><th class="p-4">Hapus</th></tr>
+                            <tr><th class="p-4">No. Peserta</th><th class="p-4">Nama</th><th class="p-4">Skor</th><th class="p-4">Aksi</th></tr>
                         </thead>
-                        <tbody id="listSiswaTable" class="divide-y divide-slate-100"></tbody>
+                        <tbody id="listSiswaTable" class="divide-y divide-slate-100 font-medium"></tbody>
                     </table>
                 </div>
             </div>
@@ -127,22 +142,23 @@
 
         <div id="siswaSection" class="hidden">
             <div id="areaUjian" class="max-w-3xl mx-auto space-y-6">
-                <div class="glass p-4 bg-blue-600 text-white flex justify-between border-none shadow-lg">
+                <div class="glass p-4 bg-blue-600 text-white flex justify-between border-none">
                     <span class="text-[10px] font-black uppercase">SISWA: <span id="namaSiswaUjian"></span></span>
-                    <span class="text-[10px] font-black tracking-widest uppercase">WAKTU: AKTIF</span>
+                    <span class="text-[10px] font-black uppercase">TKA FAUTMOLO 2026</span>
                 </div>
                 <div id="containerSoal"></div>
             </div>
             <div id="areaSelesai" class="hidden text-center glass p-16 max-w-md mx-auto">
-                <h2 class="text-3xl font-black text-slate-800 mb-2">SELESAI</h2>
-                <p class="text-slate-400 mb-8 text-[10px] font-bold tracking-widest uppercase">Hasil ujian tersimpan</p>
+                <h2 class="text-3xl font-black text-slate-800 mb-2 uppercase">SELESAI!</h2>
+                <p class="text-slate-400 mb-8 text-[10px] font-bold tracking-widest uppercase">Skor Anda:</p>
                 <div class="text-7xl font-black text-blue-600 mb-8" id="skorAkhir">0</div>
-                <button onclick="location.reload()" class="btn-primary w-full uppercase text-xs tracking-widest">Keluar</button>
+                <button onclick="location.reload()" class="btn-primary w-full text-xs">LOGOUT</button>
             </div>
         </div>
-
     </main>
 </div>
+
+<div id="printArea" class="hidden text-center p-10"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -160,28 +176,24 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
 let userLogin = null;
-let databaseSoal = [];
-let jawabanSiswa = {};
+let dbSoal = [];
+let dbSiswa = [];
 
 // LOGIN
 window.prosesLogin = async () => {
     const u = document.getElementById("l_user").value.toUpperCase();
     const p = document.getElementById("l_pass").value;
-
-    if(u === 'AMADEO' && p === 'FAUTMOLO2026') {
-        renderDashboard({ nama: "WENDELINUS CHRISTO SNAE, SE", role: "super_admin", sekolah: "KECAMATAN FAUTMOLO" });
-        return;
-    }
-
+    if(u === 'AMADEO' && p === 'FAUTMOLO2026') return renderDashboard({ nama: "WENDELINUS CHRISTO SNAE, SE", role: "super_admin", sekolah: "KECAMATAN FAUTMOLO" });
+    
     const proSnap = await get(ref(db, "proktor_tka"));
     let pData = Object.values(proSnap.val() || {}).find(x => x.userID === u && x.password === p);
     if(pData) return renderDashboard({...pData, role: 'proktor'});
-
+    
     const sisSnap = await get(ref(db, "siswa_tka"));
     let sData = Object.values(sisSnap.val() || {}).find(x => x.noPeserta === u && x.password === p);
     if(sData) return renderDashboard({...sData, role: 'siswa'});
-
-    alert("User atau Password Salah!");
+    
+    alert("Maaf, Username atau Password Salah!");
 }
 
 function renderDashboard(data) {
@@ -200,61 +212,64 @@ function renderDashboard(data) {
     } else {
         document.getElementById("siswaSection").classList.remove("hidden");
         document.getElementById("namaSiswaUjian").innerText = data.nama;
-        mulaiUjianSiswa();
+        mulaiUjian();
     }
 }
 
-// SUPER ADMIN FUNCTIONS
+// ADMIN TOOLS
 window.tambahProktor = () => {
     const s = document.getElementById("p_sekolah").value.toUpperCase();
     const u = document.getElementById("p_user").value.toUpperCase();
     const p = document.getElementById("p_pass").value;
-    if(!s || !u || !p) return alert("Isi semua bidang!");
+    if(!s || !u || !p) return alert("Wajib diisi semua!");
     push(ref(db, "proktor_tka"), { sekolah: s, userID: u, password: p, nama: "PROKTOR " + s });
-    alert("Berhasil!");
 }
 
 window.tambahSoal = () => {
     const s = {
-        tanya: document.getElementById("q_tanya").value,
-        img: document.getElementById("q_img").value,
+        tanya: document.getElementById("q_tanya").value, img: document.getElementById("q_img").value,
         a: document.getElementById("q_a").value, b: document.getElementById("q_b").value,
         c: document.getElementById("q_c").value, d: document.getElementById("q_d").value,
         kunci: document.getElementById("q_kunci").value
     };
-    if(!s.tanya || !s.kunci) return alert("Soal & Kunci wajib!");
+    if(!s.tanya || !s.kunci) return alert("Soal & Kunci wajib diisi!");
     push(ref(db, "bank_soal"), s);
-    alert("Soal Tersimpan!");
+    alert("Soal Berhasil Disimpan!");
 }
 
 function loadAdminData() {
-    // Render Tabel Proktor untuk Admin
     onValue(ref(db, "proktor_tka"), snap => {
         let h = "";
         Object.entries(snap.val() || {}).forEach(([key, p]) => {
-            h += `<tr><td class="p-2 font-bold">${p.sekolah}</td><td class="p-2">${p.userID}</td><td class="p-2">${p.password}</td><td class="p-2 text-red-500 font-bold cursor-pointer" onclick="hapusData('proktor_tka/${key}')">X</td></tr>`;
+            h += `<tr><td class="p-2 uppercase font-black text-blue-600">${p.sekolah}</td><td class="p-2">${p.userID}</td><td class="p-2">${p.password}</td><td class="p-2 text-red-500 font-bold cursor-pointer" onclick="hapusData('proktor_tka/${key}')">X</td></tr>`;
         });
         document.getElementById("tableProktorAdmin").innerHTML = h;
     });
-
     onValue(ref(db, "bank_soal"), snap => {
-        let h = ""; let count = 0;
+        let h = ""; let c = 0;
         Object.entries(snap.val() || {}).forEach(([key, q]) => {
-            count++;
-            h += `<div class="glass p-5 border-l-4 border-blue-600 text-xs relative">
-                <p class="font-bold text-slate-400 mb-1">SOAL ${count}</p>
+            c++;
+            h += `<div class="glass p-4 border-l-4 border-blue-600 text-[10px] relative">
+                <p class="font-black text-slate-400 mb-1">SOAL ${c}</p>
                 <p class="font-bold mb-2">${q.tanya}</p>
-                ${q.img ? `<img src="${q.img}" class="h-20 mb-2 rounded border">` : ''}
-                <p class="text-green-600 font-black">KUNCI: ${q.kunci}</p>
-                <button onclick="hapusData('bank_soal/${key}')" class="absolute top-4 right-4 text-red-300 hover:text-red-600">HAPUS</button>
+                ${q.img ? `<img src="${q.img}" class="h-16 mb-2 rounded shadow-sm">` : ''}
+                <p class="text-green-600 font-black uppercase">KUNCI: ${q.kunci}</p>
+                <button onclick="hapusData('bank_soal/${key}')" class="absolute top-4 right-4 text-red-300">HAPUS</button>
             </div>`;
         });
-        document.getElementById("countSoal").innerText = count;
+        document.getElementById("countSoal").innerText = c;
         document.getElementById("listSoalAdmin").innerHTML = h;
     });
 }
 
-// PROKTOR & SISWA FUNCTIONS
+// PROKTOR TOOLS
+window.simpanKepsek = () => {
+    const n = document.getElementById("s_kepsek").value.toUpperCase();
+    if(!n) return alert("Ketik nama Kepsek dulu!");
+    set(ref(db, `info_sekolah/${userLogin.sekolah}`), { kepalaSekolah: n });
+    alert("Nama Kepala Sekolah Tersimpan!");
+}
+
 window.tambahSiswa = () => {
     push(ref(db, "siswa_tka"), {
         noPeserta: document.getElementById("s_no").value.toUpperCase(),
@@ -265,50 +280,81 @@ window.tambahSiswa = () => {
 }
 
 function loadProktorData() {
+    onValue(ref(db, `info_sekolah/${userLogin.sekolah}`), snap => {
+        if(snap.exists()) document.getElementById("s_kepsek").value = snap.val().kepalaSekolah;
+    });
     onValue(ref(db, "siswa_tka"), snap => {
-        let h = "";
+        let h = ""; dbSiswa = [];
         Object.entries(snap.val() || {}).forEach(([key, s]) => {
             if(s.sekolah === userLogin.sekolah) {
-                h += `<tr><td class="p-4 font-mono">${s.noPeserta}</td><td class="p-4 font-black">${s.nama}</td><td class="p-4 font-bold text-blue-600">${s.nilai || '0'}</td><td class="p-4"><button onclick="hapusData('siswa_tka/${key}')" class="text-red-400">Hapus</button></td></tr>`;
+                dbSiswa.push(s);
+                h += `<tr><td class="p-4 font-mono font-bold text-xs">${s.noPeserta}</td><td class="p-4 font-black uppercase text-slate-700">${s.nama}</td><td class="p-4"><span class="px-3 py-1 bg-blue-50 text-blue-700 rounded-full font-black text-xs">${s.nilai || '0'}</span></td><td class="p-4 text-center"><button onclick="hapusData('siswa_tka/${key}')" class="text-red-400 font-bold">X</button></td></tr>`;
             }
         });
         document.getElementById("listSiswaTable").innerHTML = h;
     });
 }
 
-async function mulaiUjianSiswa() {
-    const snap = await get(ref(db, "bank_soal"));
-    databaseSoal = Object.entries(snap.val() || {});
-    renderSoalUjian(0);
+window.cetakKartu = async () => {
+    const snap = await get(ref(db, `info_sekolah/${userLogin.sekolah}`));
+    const kps = snap.exists() ? snap.val().kepalaSekolah : "..........................";
+    let h = "";
+    dbSiswa.forEach(s => {
+        h += `<div class="card-ujian">
+            <div style="text-align:center; font-weight:900; border-bottom:2px solid black; margin-bottom:10px; padding-bottom:5px; font-size:10px;">
+                KARTU PESERTA CBT TKA<br>KEC. FAUTMOLO 2026
+            </div>
+            <table style="width:100%; font-size:10px; font-weight:700;">
+                <tr><td>NAMA</td><td>: ${s.nama}</td></tr>
+                <tr><td>NOMOR</td><td>: ${s.noPeserta}</td></tr>
+                <tr><td>SEKOLAH</td><td>: ${s.sekolah}</td></tr>
+                <tr><td>PASS</td><td>: ${s.password}</td></tr>
+            </table>
+            <div style="margin-top:15px; text-align:right; font-size:9px;">
+                Kepala Sekolah,<br><br><br>
+                <b>${kps}</b>
+            </div>
+        </div>`;
+    });
+    document.getElementById("printArea").innerHTML = h;
+    window.print();
 }
 
-function renderSoalUjian(idx) {
-    if(idx >= databaseSoal.length) { selesaikanUjian(); return; }
-    const [id, q] = databaseSoal[idx];
+// SISWA TOOLS
+async function mulaiUjian() {
+    const snap = await get(ref(db, "bank_soal"));
+    dbSoal = Object.entries(snap.val() || {});
+    if(dbSoal.length > 0) renderSoal(0);
+}
+
+function renderSoal(idx) {
+    if(idx >= dbSoal.length) { selesaikan(); return; }
+    const [id, q] = dbSoal[idx];
     document.getElementById("containerSoal").innerHTML = `
-        <div class="glass p-8 shadow-xl">
-            <p class="text-[10px] font-black text-slate-400 mb-2 uppercase">Pertanyaan ${idx + 1} / ${databaseSoal.length}</p>
-            <p class="text-xl font-bold mb-6">${q.tanya}</p>
-            ${q.img ? `<img src="${q.img}" class="max-w-full rounded-xl mb-6 border">` : ''}
+        <div class="glass p-8 shadow-xl animate-in slide-in-from-bottom duration-300">
+            <p class="text-[9px] font-black text-slate-400 mb-2">SOAL ${idx+1} / ${dbSoal.length}</p>
+            <p class="text-lg font-bold mb-6 text-slate-800 leading-relaxed">${q.tanya}</p>
+            ${q.img ? `<img src="${q.img}" class="max-w-full rounded-xl mb-6 border-4 border-white shadow-sm">` : ''}
             <div class="grid grid-cols-1 gap-3">
-                ${['A','B','C','D'].map(o => `<button onclick="pilihJawaban('${id}', '${o}', ${idx})" class="text-left p-4 rounded-xl border-2 hover:bg-blue-50 font-bold"><span class="bg-slate-100 px-2 py-1 rounded mr-3">${o}</span> ${q[o.toLowerCase()]}</button>`).join('')}
+                ${['A','B','C','D'].map(o => `<button onclick="pilih('${id}', '${o}', ${idx})" class="text-left p-4 rounded-xl border-2 border-slate-100 hover:border-blue-600 hover:bg-blue-50 transition-all font-bold group"><span class="bg-slate-100 group-hover:bg-blue-600 group-hover:text-white px-2 py-1 rounded mr-3">${o}</span> ${q[o.toLowerCase()]}</button>`).join('')}
             </div>
         </div>`;
 }
 
-window.pilihJawaban = (id, j, idx) => { jawabanSiswa[id] = j; renderSoalUjian(idx + 1); }
+let jawabanSiswa = {};
+window.pilih = (id, j, idx) => { jawabanSiswa[id] = j; renderSoal(idx+1); }
 
-async function selesaikanUjian() {
-    let b = 0; databaseSoal.forEach(([id, q]) => { if(jawabanSiswa[id] === q.kunci) b++; });
-    const s = Math.round((b / databaseSoal.length) * 100);
-    const snap = await get(ref(db, "siswa_tka"));
-    Object.entries(snap.val()).forEach(([k, x]) => { if(x.noPeserta === userLogin.noPeserta) set(ref(db, `siswa_tka/${k}/nilai`), s); });
+async function selesaikan() {
+    let b = 0; dbSoal.forEach(([id, q]) => { if(jawabanSiswa[id] === q.kunci) b++; });
+    const s = Math.round((b / dbSoal.length) * 100);
+    const snp = await get(ref(db, "siswa_tka"));
+    Object.entries(snp.val()).forEach(([k, x]) => { if(x.noPeserta === userLogin.noPeserta) set(ref(db, `siswa_tka/${k}/nilai`), s); });
     document.getElementById("areaUjian").classList.add("hidden");
     document.getElementById("areaSelesai").classList.remove("hidden");
     document.getElementById("skorAkhir").innerText = s;
 }
 
-window.hapusData = (path) => confirm("Yakin hapus?") && remove(ref(db, path));
+window.hapusData = (path) => confirm("Hapus data?") && remove(ref(db, path));
 </script>
 </body>
 </html>
