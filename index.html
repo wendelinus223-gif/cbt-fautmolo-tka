@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CBT TKA FAUTMOLO - BY WENDELINUS CHRISTO SNAE, SE</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #1e293b; }
@@ -85,7 +86,7 @@
                     </div>
                     <div class="overflow-x-auto border rounded-xl">
                         <table class="w-full text-xs text-left">
-                            <thead class="bg-slate-100"><tr><th class="p-3">Sekolah</th><th class="p-3">Aksi</th></tr></thead>
+                            <thead class="bg-slate-100"><tr><th class="p-3">Sekolah</th><th class="p-3 text-center">Aksi</th></tr></thead>
                             <tbody id="listProktorTable"></tbody>
                         </table>
                     </div>
@@ -204,7 +205,6 @@ function renderDashboard(data) {
     document.getElementById("userNama").innerText = data.nama;
     document.getElementById("displaySekolah").innerText = data.sekolah;
 
-    // Sinkronisasi Sesi Nasional
     onValue(ref(db, "pengaturan_pusat/sesi_aktif"), (snap) => {
         sesiAktifNasional = snap.val() || "NONAKTIF";
         if(document.getElementById("statusSesiSekarang")) {
@@ -212,7 +212,6 @@ function renderDashboard(data) {
             document.getElementById("admin_set_sesi").value = sesiAktifNasional;
         }
         
-        // Jika sedang login sebagai siswa, cek ulang tampilan
         if(userLogin.role === 'siswa') cekSesiSiswa();
         if(userLogin.role === 'proktor') loadProktorData();
     });
@@ -230,14 +229,41 @@ function renderDashboard(data) {
     }
 }
 
-// ADMIN ONLY: UPDATE SESI NASIONAL
+// ADMIN ONLY: UNDUH EXCEL PER SEKOLAH
+window.unduhExcelSekolah = async (namaSekolah) => {
+    const snap = await get(ref(db, "siswa_tka"));
+    const dataSiswa = snap.val();
+    if(!dataSiswa) return alert("Belum ada data siswa.");
+
+    const filteredSiswa = Object.values(dataSiswa).filter(s => s.sekolah === namaSekolah);
+    if(filteredSiswa.length === 0) return alert("Belum ada siswa terdaftar di sekolah ini.");
+
+    const rows = [];
+    rows.push(["REKAP NILAI TKA FAUTMOLO"]);
+    rows.push(["SEKOLAH: " + namaSekolah]);
+    rows.push([]);
+    rows.push(["NO", "NO PESERTA", "NAMA SISWA", "LITERASI", "NUMERASI", "RATA-RATA", "STATUS"]);
+
+    filteredSiswa.forEach((s, i) => {
+        const l = s.nilaiL || 0;
+        const n = s.nilaiN || 0;
+        const rata = (l + n) / 2;
+        const status = (s.selesaiL && s.selesaiN) ? "LENGKAP" : "BELUM LENGKAP";
+        rows.push([i+1, s.noPeserta, s.nama, l, n, rata, status]);
+    });
+
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Laporan");
+    XLSX.writeFile(wb, `LAPORAN_${namaSekolah.replace(/ /g, "_")}.xlsx`);
+}
+
 window.updateSesiNasional = (val) => {
     set(ref(db, "pengaturan_pusat/sesi_aktif"), val).then(() => {
         alert("✅ PERHATIAN: Seluruh sistem sekarang beralih ke sesi " + val);
     });
 }
 
-// SISWA: LOGIKA OTOMATIS BERDASARKAN SESI ADMIN
 async function cekSesiSiswa() {
     if(sesiAktifNasional === "NONAKTIF") {
         document.getElementById("areaTunggu").classList.remove("hidden");
@@ -245,11 +271,8 @@ async function cekSesiSiswa() {
         document.getElementById("areaSelesai").classList.add("hidden");
     } else {
         const fieldSelesai = sesiAktifNasional === "LITERASI" ? 'selesaiL' : 'selesaiN';
-        
-        // Ambil data terbaru siswa untuk cek status selesai
         const freshSnap = await get(ref(db, `siswa_tka/${userLogin.dbId}`));
         const freshData = freshSnap.val();
-
         if(freshData[fieldSelesai]) {
             tampilkanSkorSelesai(freshData[sesiAktifNasional === "LITERASI" ? 'nilaiL' : 'nilaiN']);
         } else {
@@ -287,7 +310,6 @@ function renderSoal(idx) {
     const q = soalUjian[idx];
     const container = document.getElementById("containerSoal");
     const badge = `<span class="badge-sesi ${sesiAktifNasional === 'LITERASI' ? 'bg-literasi' : 'bg-numerasi'}">${sesiAktifNasional}</span>`;
-
     if (q.kunci === "MATCH") {
         const kiri = [q.a.split(':')[0], q.b.split(':')[0], q.c.split(':')[0], q.d.split(':')[0]];
         const kanan = [q.a.split(':')[1], q.b.split(':')[1], q.c.split(':')[1], q.d.split(':')[1]].sort(()=>Math.random()-0.5);
@@ -304,7 +326,6 @@ function tampilkanSkorSelesai(skor) {
     document.getElementById("skorAkhir").innerText = skor || 0;
 }
 
-// LOGIKA JAWABAN (NORMAL & MATCH)
 window.pilihKiri = (val) => { selectedKiri = val; document.querySelectorAll('[id^="L-"]').forEach(el => el.classList.remove('selected-match')); document.getElementById(`L-${val}`).classList.add('selected-match'); };
 window.pilihKanan = (val) => { if(!selectedKiri) return alert("Pilih kiri dulu!"); pasanganSiswa[selectedKiri] = val; document.getElementById(`L-${selectedKiri}`).classList.add('paired-match'); document.getElementById(`R-${val}`).classList.add('paired-match'); selectedKiri = null; };
 window.cekMatch = (idx) => {
@@ -321,7 +342,6 @@ window.prosesNormal = (kunci, idx) => {
     renderSoal(idx + 1);
 };
 
-// PROKTOR: KEPSEK & SISWA
 window.simpanKepsek = () => {
     const n = document.getElementById("s_kepsek").value.toUpperCase();
     set(ref(db, `info_sekolah/${userLogin.sekolah}`), { kepalaSekolah: n }).then(() => alert("Nama Kepsek Disimpan!"));
@@ -345,7 +365,6 @@ function loadProktorData() {
     });
 }
 
-// SUPER ADMIN: PROKTOR & BANK SOAL
 window.tambahProktor = () => {
     const data = { sekolah: document.getElementById("p_sekolah").value.toUpperCase(), userID: document.getElementById("p_user").value.toUpperCase(), password: document.getElementById("p_pass").value, nama: "PROKTOR" };
     push(ref(db, "proktor_tka"), data).then(() => alert("Proktor Terdaftar!"));
@@ -354,7 +373,13 @@ function loadProktorList() {
     onValue(ref(db, "proktor_tka"), snap => {
         let h = "";
         Object.entries(snap.val() || {}).forEach(([id, p]) => {
-            h += `<tr class="border-b"><td class="p-3 font-bold">${p.sekolah}</td><td class="p-3"><button onclick="remove(ref(db,'proktor_tka/${id}'))" class="text-red-500 font-bold">HAPUS</button></td></tr>`;
+            h += `<tr class="border-b">
+                    <td class="p-3 font-bold">${p.sekolah}</td>
+                    <td class="p-3 flex justify-center gap-2">
+                        <button onclick="unduhExcelSekolah('${p.sekolah}')" class="bg-green-600 text-white px-3 py-1 rounded-lg text-[10px] font-bold hover:bg-green-700 transition">UNDUH EXCEL</button>
+                        <button onclick="remove(ref(db,'proktor_tka/${id}'))" class="bg-red-500 text-white px-3 py-1 rounded-lg text-[10px] font-bold hover:bg-red-600 transition">HAPUS</button>
+                    </td>
+                  </tr>`;
         });
         document.getElementById("listProktorTable").innerHTML = h;
     });
