@@ -15,7 +15,7 @@
         .btn-primary:hover { background: #1e3a8a; transform: translateY(-2px); }
         .owner-badge { background: linear-gradient(135deg, #1e293b 0%, #334155 100%); color: #f1f5f9; padding: 10px 20px; border-radius: 50px; font-size: 11px; font-weight: 800; letter-spacing: 1px; display: inline-block; }
         @media print { .no-print { display: none; } body { background: white; } #printArea { display: block !important; } }
-        .card-ujian { border: 2px solid #000; padding: 15px; width: 320px; margin: 10px; display: inline-block; vertical-align: top; text-align: left; background: white; font-family: 'Courier New', Courier, monospace; }
+        .card-ujian { border: 2px solid #000; padding: 15px; width: 350px; margin: 10px; display: inline-block; vertical-align: top; text-align: left; background: white; font-family: 'Courier New', Courier, monospace; position: relative; }
     </style>
 </head>
 <body class="min-h-screen">
@@ -304,15 +304,22 @@ window.cetakKartu = async () => {
             <div style="text-align:center; font-weight:900; border-bottom:2px solid black; margin-bottom:10px; padding-bottom:5px; font-size:10px;">
                 KARTU PESERTA CBT TKA<br>KEC. FAUTMOLO 2026
             </div>
-            <table style="width:100%; font-size:10px; font-weight:700;">
-                <tr><td>NAMA</td><td>: ${s.nama}</td></tr>
+            <table style="width:100%; font-size:10px; font-weight:700; margin-bottom:15px;">
+                <tr><td width="80">NAMA</td><td>: ${s.nama}</td></tr>
                 <tr><td>NOMOR</td><td>: ${s.noPeserta}</td></tr>
                 <tr><td>SEKOLAH</td><td>: ${s.sekolah}</td></tr>
                 <tr><td>PASS</td><td>: ${s.password}</td></tr>
             </table>
-            <div style="margin-top:15px; text-align:right; font-size:9px;">
-                Kepala Sekolah,<br><br><br>
-                <b>${kps}</b>
+            
+            <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:10px;">
+                <div style="border:1px solid black; width:60px; height:80px; display:flex; align-items:center; justify-content:center; font-size:8px; color:#ccc; font-family:sans-serif; text-align:center;">
+                    FOTO<br>2x3/3x4
+                </div>
+                
+                <div style="text-align:right; font-size:9px;">
+                    Kepala Sekolah,<br><br><br><br>
+                    <b>${kps}</b>
+                </div>
             </div>
         </div>`;
     });
