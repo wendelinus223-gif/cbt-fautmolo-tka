@@ -16,6 +16,8 @@
         .owner-badge { background: linear-gradient(135deg, #1e293b 0%, #334155 100%); color: #f1f5f9; padding: 10px 20px; border-radius: 50px; font-size: 11px; font-weight: 800; letter-spacing: 1px; display: inline-block; }
         @media print { .no-print { display: none; } body { background: white; } #printArea { display: block !important; } }
         .card-ujian { border: 2px solid #000; padding: 15px; width: 350px; margin: 10px; display: inline-block; vertical-align: top; text-align: left; background: white; font-family: 'Courier New', Courier, monospace; position: relative; }
+        .selected-match { background-color: #dbeafe !important; border-color: #2563eb !important; }
+        .paired-match { background-color: #f0fdf4 !important; border-color: #22c55e !important; color: #15803d !important; }
     </style>
 </head>
 <body class="min-h-screen">
@@ -66,23 +68,19 @@
                         <input type="text" id="p_pass" placeholder="Password">
                         <button onclick="tambahProktor()" class="w-full btn-primary text-xs uppercase">Daftarkan Proktor</button>
                     </div>
-                    <div id="tableProktorAdmin"></div>
                 </div>
                 <div class="glass p-8">
                     <h3 class="font-black mb-6 text-slate-700 text-sm tracking-widest uppercase">📝 Bank Soal</h3>
                     <div class="space-y-3">
-                        <textarea id="q_tanya" rows="3" placeholder="Teks Pertanyaan..."></textarea>
-                        <input type="text" id="q_img" placeholder="Link Gambar Soal (Opsional)">
+                        <textarea id="q_tanya" rows="2" placeholder="Teks Pertanyaan..."></textarea>
+                        <input type="text" id="q_img" placeholder="Link Gambar (Opsional)">
                         <div class="grid grid-cols-2 gap-2 text-xs">
-                            <input type="text" id="q_a" placeholder="Opsi A">
-                            <input type="text" id="q_b" placeholder="Opsi B">
-                            <input type="text" id="q_c" placeholder="Opsi C">
-                            <input type="text" id="q_d" placeholder="Opsi D">
+                            <input type="text" id="q_a" placeholder="Opsi A (Mode Match: Kiri:Kanan)">
+                            <input type="text" id="q_b" placeholder="Opsi B (Mode Match: Kiri:Kanan)">
+                            <input type="text" id="q_c" placeholder="Opsi C (Mode Match: Kiri:Kanan)">
+                            <input type="text" id="q_d" placeholder="Opsi D (Mode Match: Kiri:Kanan)">
                         </div>
-                        <select id="q_kunci">
-                            <option value="">-- Pilih Kunci Jawaban --</option>
-                            <option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option>
-                        </select>
+                        <input type="text" id="q_kunci" placeholder="Kunci (A / AC / MATCH)">
                         <button onclick="tambahSoal()" class="w-full bg-purple-600 text-white font-bold py-3 rounded-xl uppercase text-xs">Simpan Soal</button>
                     </div>
                 </div>
@@ -90,53 +88,32 @@
         </div>
 
         <div id="proktorSection" class="hidden space-y-6">
-            <div class="glass p-8 border-l-8 border-blue-600">
-                <h3 class="font-black mb-4 text-slate-700 uppercase tracking-widest text-sm text-blue-600">Pengaturan Identitas Sekolah</h3>
-                <div class="flex flex-col md:flex-row gap-3">
-                    <input type="text" id="s_kepsek" placeholder="Ketik Nama Kepala Sekolah...">
-                    <button onclick="simpanKepsek()" class="bg-green-600 text-white px-6 py-3 rounded-xl font-bold text-xs uppercase shadow-lg">SIMPAN NAMA KEPSEK</button>
-                </div>
-            </div>
-
             <div class="glass p-8">
                 <h3 class="font-black mb-6 text-slate-700 uppercase tracking-widest text-sm">Manajemen Siswa</h3>
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-6">
                     <input type="text" id="s_no" placeholder="No. Peserta">
                     <input type="text" id="s_nama" placeholder="Nama Lengkap">
                     <input type="text" id="s_pass" placeholder="Password">
-                    <button onclick="tambahSiswa()" id="btnTambahSiswa" class="btn-primary text-xs uppercase font-black">Tambah Siswa</button>
+                    <button onclick="tambahSiswa()" id="btnTambahSiswa" class="btn-primary text-xs uppercase font-black">Tambah/Update Siswa</button>
                 </div>
-                
-                <button onclick="cetakKartu()" class="bg-orange-500 text-white px-5 py-3 rounded-xl text-xs font-black uppercase mb-6">CETAK KARTU UJIAN</button>
-
-                <div class="overflow-hidden rounded-xl border border-slate-100">
+                <div class="overflow-hidden rounded-xl border">
                     <table class="w-full text-sm text-left">
                         <thead class="bg-slate-50 text-slate-400 uppercase text-[10px] font-black">
-                            <tr>
-                                <th class="p-4">No. Peserta</th>
-                                <th class="p-4">Nama</th>
-                                <th class="p-4">Password</th>
-                                <th class="p-4">Aksi</th>
-                            </tr>
+                            <tr><th class="p-4">No. Peserta</th><th class="p-4">Nama</th><th class="p-4">Aksi</th></tr>
                         </thead>
-                        <tbody id="listSiswaTable" class="divide-y divide-slate-100 font-medium"></tbody>
+                        <tbody id="listSiswaTable" class="divide-y"></tbody>
                     </table>
                 </div>
             </div>
 
             <div class="glass p-8">
-                <h3 class="font-black mb-6 text-blue-600 uppercase tracking-widest text-sm">Riwayat & Hasil Pengerjaan Siswa</h3>
-                <div class="overflow-hidden rounded-xl border border-slate-100">
+                <h3 class="font-black mb-6 text-blue-600 uppercase tracking-widest text-sm">Riwayat & Hasil Siswa</h3>
+                <div class="overflow-hidden rounded-xl border">
                     <table class="w-full text-sm text-left">
                         <thead class="bg-blue-50 text-blue-400 uppercase text-[10px] font-black">
-                            <tr>
-                                <th class="p-4">No. Peserta</th>
-                                <th class="p-4">Nama Siswa</th>
-                                <th class="p-4">Status</th>
-                                <th class="p-4">Skor Akhir</th>
-                            </tr>
+                            <tr><th class="p-4">Nama Siswa</th><th class="p-4">Status</th><th class="p-4">Skor</th></tr>
                         </thead>
-                        <tbody id="riwayatSkorTable" class="divide-y divide-slate-100 font-medium"></tbody>
+                        <tbody id="riwayatSkorTable" class="divide-y"></tbody>
                     </table>
                 </div>
             </div>
@@ -144,22 +121,16 @@
 
         <div id="siswaSection" class="hidden">
             <div id="areaUjian" class="max-w-3xl mx-auto space-y-6">
-                <div class="glass p-4 bg-blue-600 text-white flex justify-between border-none">
-                    <span class="text-[10px] font-black uppercase">SISWA: <span id="namaSiswaUjian"></span></span>
-                    <span class="text-[10px] font-black uppercase">TKA FAUTMOLO 2026</span>
-                </div>
                 <div id="containerSoal"></div>
             </div>
             <div id="areaSelesai" class="hidden text-center glass p-16 max-w-md mx-auto">
-                <h2 class="text-3xl font-black text-slate-800 mb-2 uppercase">SELESAI!</h2>
+                <h2 class="text-3xl font-black text-slate-800 mb-2">SELESAI!</h2>
                 <div class="text-7xl font-black text-blue-600 mb-8" id="skorAkhir">0</div>
-                <button onclick="location.reload()" class="btn-primary w-full text-xs">LOGOUT</button>
+                <button onclick="location.reload()" class="btn-primary w-full">LOGOUT</button>
             </div>
         </div>
     </main>
 </div>
-
-<div id="printArea" class="hidden"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -177,8 +148,9 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
 let userLogin = null;
-let dbSiswa = [];
 let currentEditId = null;
+let selectedKiri = null;
+let pasanganSiswa = {};
 
 // LOGIN
 window.prosesLogin = async () => {
@@ -193,7 +165,6 @@ window.prosesLogin = async () => {
     const sisSnap = await get(ref(db, "siswa_tka"));
     let sData = Object.entries(sisSnap.val() || {}).find(([k,v]) => v.noPeserta === u && v.password === p);
     if(sData) return renderDashboard({...sData[1], role: 'siswa', dbId: sData[0]});
-    
     alert("Login Gagal!");
 }
 
@@ -201,139 +172,143 @@ function renderDashboard(data) {
     userLogin = data;
     document.getElementById("loginPage").classList.add("hidden");
     document.getElementById("mainApp").classList.remove("hidden");
-    document.getElementById("userNama").innerText = data.nama;
-    document.getElementById("displaySekolah").innerText = data.sekolah;
-
-    if(data.role === 'super_admin') {
-        document.getElementById("superAdminSection").classList.remove("hidden");
-    } else if(data.role === 'proktor') {
-        document.getElementById("proktorSection").classList.remove("hidden");
-        loadProktorData();
-    } else {
-        document.getElementById("siswaSection").classList.remove("hidden");
-        document.getElementById("namaSiswaUjian").innerText = data.nama;
-        mulaiUjian();
-    }
+    if(data.role === 'super_admin') document.getElementById("superAdminSection").classList.remove("hidden");
+    else if(data.role === 'proktor') { document.getElementById("proktorSection").classList.remove("hidden"); loadProktorData(); }
+    else { document.getElementById("siswaSection").classList.remove("hidden"); mulaiUjian(); }
 }
 
-// MANAJEMEN SISWA (PROKTOR)
+// ADMIN TOOLS
+window.tambahSoal = () => {
+    const data = {
+        tanya: document.getElementById("q_tanya").value,
+        img: document.getElementById("q_img").value,
+        a: document.getElementById("q_a").value,
+        b: document.getElementById("q_b").value,
+        c: document.getElementById("q_c").value,
+        d: document.getElementById("q_d").value,
+        kunci: document.getElementById("q_kunci").value.toUpperCase()
+    };
+    push(ref(db, "bank_soal"), data).then(() => alert("Soal Tersimpan!"));
+}
+
+// PROKTOR TOOLS
 window.tambahSiswa = () => {
-    const no = document.getElementById("s_no").value.toUpperCase();
-    const nm = document.getElementById("s_nama").value.toUpperCase();
-    const ps = document.getElementById("s_pass").value;
-    if(!no || !nm || !ps) return alert("Lengkapi data!");
-
-    const data = { noPeserta: no, nama: nm, password: ps, sekolah: userLogin.sekolah, nilai: userLogin.nilai || 0, sudahUjian: false };
-
-    if(currentEditId) {
-        update(ref(db, `siswa_tka/${currentEditId}`), data).then(() => {
-            alert("Data Berhasil Diperbarui!");
-            resetForm();
-        });
-    } else {
-        push(ref(db, "siswa_tka"), data).then(() => {
-            alert("Siswa Berhasil Terinput!");
-            resetForm();
-        });
-    }
+    const data = { 
+        noPeserta: document.getElementById("s_no").value.toUpperCase(),
+        nama: document.getElementById("s_nama").value.toUpperCase(),
+        password: document.getElementById("s_pass").value,
+        sekolah: userLogin.sekolah, sudahUjian: false, nilai: 0 
+    };
+    if(currentEditId) update(ref(db, `siswa_tka/${currentEditId}`), data).then(() => { alert("Updated!"); resetForm(); });
+    else push(ref(db, "siswa_tka"), data).then(() => resetForm());
 }
 
 window.editSiswa = (id, no, nm, ps) => {
-    document.getElementById("s_no").value = no;
-    document.getElementById("s_nama").value = nm;
-    document.getElementById("s_pass").value = ps;
-    document.getElementById("btnTambahSiswa").innerText = "SIMPAN PERUBAHAN";
-    currentEditId = id;
-    window.scrollTo(0,0);
-}
-
-window.hapusSiswa = (id) => {
-    if(confirm("Hapus siswa ini?")) remove(ref(db, `siswa_tka/${id}`));
-}
-
-function resetForm() {
-    document.getElementById("s_no").value = "";
-    document.getElementById("s_nama").value = "";
-    document.getElementById("s_pass").value = "";
-    document.getElementById("btnTambahSiswa").innerText = "TAMBAH SISWA";
-    currentEditId = null;
+    document.getElementById("s_no").value = no; document.getElementById("s_nama").value = nm;
+    document.getElementById("s_pass").value = ps; currentEditId = id;
 }
 
 function loadProktorData() {
     onValue(ref(db, "siswa_tka"), snap => {
-        let hSiswa = ""; 
-        let hSkor = "";
-        dbSiswa = [];
-        Object.entries(snap.val() || {}).forEach(([key, s]) => {
+        let h1 = ""; let h2 = "";
+        Object.entries(snap.val() || {}).forEach(([k, s]) => {
             if(s.sekolah === userLogin.sekolah) {
-                dbSiswa.push(s);
-                // Tabel Manajemen
-                hSiswa += `<tr>
-                    <td class="p-4 font-bold">${s.noPeserta}</td>
-                    <td class="p-4 uppercase">${s.nama}</td>
-                    <td class="p-4 font-mono">${s.password}</td>
-                    <td class="p-4 space-x-3">
-                        <button onclick="editSiswa('${key}','${s.noPeserta}','${s.nama}','${s.password}')" class="text-blue-600 font-bold">✏️ EDIT</button>
-                        <button onclick="hapusSiswa('${key}')" class="text-red-500 font-bold">X</button>
-                    </td>
-                </tr>`;
-                // Tabel Riwayat Skor
-                hSkor += `<tr>
-                    <td class="p-4">${s.noPeserta}</td>
-                    <td class="p-4 font-bold uppercase">${s.nama}</td>
-                    <td class="p-4 italic text-xs">${s.sudahUjian ? '✅ Selesai' : '⏳ Belum'}</td>
-                    <td class="p-4 font-black text-blue-700 text-lg">${s.nilai || '0'}</td>
-                </tr>`;
+                h1 += `<tr><td class="p-4">${s.noPeserta}</td><td class="p-4">${s.nama}</td><td class="p-4"><button onclick="editSiswa('${k}','${s.noPeserta}','${s.nama}','${s.password}')" class="text-blue-600">✏️</button></td></tr>`;
+                h2 += `<tr><td class="p-4">${s.nama}</td><td class="p-4">${s.sudahUjian?'✅':'⏳'}</td><td class="p-4 font-bold">${s.nilai}</td></tr>`;
             }
         });
-        document.getElementById("listSiswaTable").innerHTML = hSiswa;
-        document.getElementById("riwayatSkorTable").innerHTML = hSkor;
+        document.getElementById("listSiswaTable").innerHTML = h1;
+        document.getElementById("riwayatSkorTable").innerHTML = h2;
     });
 }
 
-// UJIAN (SISWA)
+function resetForm() { currentEditId = null; document.querySelectorAll('#proktorSection input').forEach(i => i.value=""); }
+
+// SISWA TOOLS (UJIAN)
 async function mulaiUjian() {
     const snap = await get(ref(db, "bank_soal"));
     const soal = Object.entries(snap.val() || {});
     renderSoal(soal, 0, 0);
 }
 
-function renderSoal(allSoal, idx, skorBenar) {
+function renderSoal(allSoal, idx, skor) {
     if(idx >= allSoal.length) {
-        const total = Math.round((skorBenar / allSoal.length) * 100);
+        const total = Math.round((skor/allSoal.length)*100);
         update(ref(db, `siswa_tka/${userLogin.dbId}`), { nilai: total, sudahUjian: true });
         document.getElementById("areaUjian").classList.add("hidden");
         document.getElementById("areaSelesai").classList.remove("hidden");
         document.getElementById("skorAkhir").innerText = total;
         return;
     }
+
     const [id, q] = allSoal[idx];
-    document.getElementById("containerSoal").innerHTML = `
-        <div class="glass p-8 shadow-xl">
-            <p class="text-[9px] font-black text-slate-400 mb-2">SOAL ${idx+1}</p>
-            <p class="text-lg font-bold mb-6">${q.tanya}</p>
-            <div class="grid grid-cols-1 gap-3">
-                ${['A','B','C','D'].map(o => `
-                    <button onclick="jawab('${q.kunci}','${o}', ${idx}, ${skorBenar}, ${JSON.stringify(allSoal).replace(/"/g, '&quot;')})" 
-                    class="text-left p-4 rounded-xl border-2 border-slate-100 hover:border-blue-600 font-bold">
-                        ${o}. ${q[o.toLowerCase()]}
-                    </button>
-                `).join('')}
-            </div>
-        </div>`;
+    const container = document.getElementById("containerSoal");
+    pasanganSiswa = {}; selectedKiri = null;
+
+    if (q.kunci === "MATCH") {
+        const kiri = [q.a.split(':')[0], q.b.split(':')[0], q.c.split(':')[0], q.d.split(':')[0]];
+        const kanan = [q.a.split(':')[1], q.b.split(':')[1], q.c.split(':')[1], q.d.split(':')[1]].sort(()=>Math.random()-0.5);
+        container.innerHTML = `
+            <div class="glass p-8 shadow-xl">
+                <p class="text-[9px] font-black text-slate-400 mb-2">SOAL ${idx+1} (MENJODOHKAN)</p>
+                <p class="text-lg font-bold mb-6">${q.tanya}</p>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-2">${kiri.map(k=>`<div id="L-${k}" onclick="pilihKiri('${k}')" class="p-3 border-2 rounded-xl cursor-pointer text-center font-bold bg-white">${k}</div>`).join('')}</div>
+                    <div class="space-y-2">${kanan.map(kn=>`<div id="R-${kn}" onclick="pilihKanan('${kn}')" class="p-3 border-2 rounded-xl cursor-pointer text-center font-bold bg-white">${kn}</div>`).join('')}</div>
+                </div>
+                <div id="statusMatch" class="mt-4 text-xs font-bold text-blue-600"></div>
+                <button onclick="cekMatch(${idx}, ${skor}, ${JSON.stringify(allSoal).replace(/"/g, '&quot;')})" class="w-full mt-6 btn-primary">SIMPAN & LANJUT</button>
+            </div>`;
+    } else {
+        const isMulti = q.kunci.length > 1;
+        container.innerHTML = `
+            <div class="glass p-8 shadow-xl">
+                <p class="text-[9px] font-black text-slate-400 mb-2">SOAL ${idx+1}</p>
+                <p class="text-lg font-bold mb-6">${q.tanya}</p>
+                ${q.img ? `<img src="${q.img}" class="mb-4 rounded-lg">` : ''}
+                <div class="space-y-3">
+                    ${['A','B','C','D'].map(o => `
+                        <label class="flex items-center p-4 border-2 rounded-xl cursor-pointer hover:bg-blue-50">
+                            <input type="${isMulti?'checkbox':'radio'}" name="ans" value="${o}" class="w-5 h-5">
+                            <span class="ml-4 font-bold">${o}. ${q[o.toLowerCase()]}</span>
+                        </label>
+                    `).join('')}
+                </div>
+                <button onclick="prosesNormal('${q.kunci}', ${idx}, ${skor}, ${JSON.stringify(allSoal).replace(/"/g, '&quot;')})" class="w-full mt-6 btn-primary">LANJUT</button>
+            </div>`;
+    }
 }
 
-window.jawab = (kunci, pil, idx, skor, all) => {
-    if(pil === kunci) skor++;
-    renderSoal(all, idx + 1, skor);
-}
+// LOGIKA MATCHING
+window.pilihKiri = (val) => {
+    selectedKiri = val;
+    document.querySelectorAll('[id^="L-"]').forEach(el => el.classList.remove('selected-match'));
+    document.getElementById(`L-${val}`).classList.add('selected-match');
+};
 
-// FUNGSI LAIN
-window.simpanKepsek = () => {
-    const n = document.getElementById("s_kepsek").value.toUpperCase();
-    set(ref(db, `info_sekolah/${userLogin.sekolah}`), { kepalaSekolah: n });
-    alert("Nama Kepsek Disimpan!");
-}
+window.pilihKanan = (val) => {
+    if(!selectedKiri) return alert("Pilih kata di kiri dulu!");
+    pasanganSiswa[selectedKiri] = val;
+    document.getElementById(`L-${selectedKiri}`).classList.add('paired-match');
+    document.getElementById(`R-${val}`).classList.add('paired-match');
+    document.getElementById('statusMatch').innerHTML += `<div>✅ ${selectedKiri} - ${val}</div>`;
+    selectedKiri = null;
+};
+
+window.cekMatch = (idx, skor, all) => {
+    const q = all[idx][1];
+    const k = { [q.a.split(':')[0]]:q.a.split(':')[1], [q.b.split(':')[0]]:q.b.split(':')[1], [q.c.split(':')[0]]:q.c.split(':')[1], [q.d.split(':')[0]]:q.d.split(':')[1] };
+    let b = true; for(let key in k) if(pasanganSiswa[key] !== k[key]) b = false;
+    if(b) skor++; renderSoal(all, idx+1, skor);
+};
+
+// LOGIKA NORMAL / CHECKBOX
+window.prosesNormal = (kunci, idx, skor, all) => {
+    const terpilih = Array.from(document.querySelectorAll('input[name="ans"]:checked')).map(e=>e.value).sort().join('');
+    if(!terpilih) return alert("Pilih jawaban!");
+    if(terpilih === kunci.split('').sort().join('')) skor++;
+    renderSoal(all, idx+1, skor);
+};
 </script>
 </body>
 </html>
