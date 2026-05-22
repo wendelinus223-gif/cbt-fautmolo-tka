@@ -14,8 +14,6 @@
         .btn-primary { background: #1e40af; color: white; font-weight: 700; padding: 12px 24px; border-radius: 12px; transition: 0.3s; }
         .btn-primary:hover { background: #1e3a8a; transform: translateY(-2px); }
         .owner-badge { background: linear-gradient(135deg, #1e293b 0%, #334155 100%); color: #f1f5f9; padding: 10px 20px; border-radius: 50px; font-size: 11px; font-weight: 800; letter-spacing: 1px; display: inline-block; }
-        @media print { .no-print { display: none; } body { background: white; } #printArea { display: block !important; } }
-        .card-ujian { border: 2px solid #000; padding: 15px; width: 350px; margin: 10px; display: inline-block; vertical-align: top; text-align: left; background: white; font-family: 'Courier New', Courier, monospace; position: relative; }
         .selected-match { background-color: #dbeafe !important; border-color: #2563eb !important; }
         .paired-match { background-color: #f0fdf4 !important; border-color: #22c55e !important; color: #15803d !important; }
     </style>
@@ -66,7 +64,19 @@
                         <input type="text" id="p_sekolah" placeholder="Nama Lembaga/Sekolah">
                         <input type="text" id="p_user" placeholder="User ID Login">
                         <input type="text" id="p_pass" placeholder="Password">
-                        <button onclick="tambahProktor()" class="w-full btn-primary text-xs uppercase">Daftarkan Proktor</button>
+                        <button onclick="tambahProktor()" id="btnProktor" class="w-full btn-primary text-xs uppercase">Daftarkan Proktor</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs text-left border">
+                            <thead class="bg-slate-100 uppercase font-bold">
+                                <tr>
+                                    <th class="p-2">Sekolah</th>
+                                    <th class="p-2">Username</th>
+                                    <th class="p-2">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="listProktorTable"></tbody>
+                        </table>
                     </div>
                 </div>
                 <div class="glass p-8">
@@ -149,6 +159,7 @@ const db = getDatabase(app);
 
 let userLogin = null;
 let currentEditId = null;
+let currentProktorId = null;
 let selectedKiri = null;
 let pasanganSiswa = {};
 
@@ -172,12 +183,74 @@ function renderDashboard(data) {
     userLogin = data;
     document.getElementById("loginPage").classList.add("hidden");
     document.getElementById("mainApp").classList.remove("hidden");
-    if(data.role === 'super_admin') document.getElementById("superAdminSection").classList.remove("hidden");
+    if(data.role === 'super_admin') {
+        document.getElementById("superAdminSection").classList.remove("hidden");
+        loadProktorList();
+    }
     else if(data.role === 'proktor') { document.getElementById("proktorSection").classList.remove("hidden"); loadProktorData(); }
     else { document.getElementById("siswaSection").classList.remove("hidden"); mulaiUjian(); }
 }
 
-// ADMIN TOOLS
+// ADMIN TOOLS (MANAJEMEN PROKTOR)
+window.tambahProktor = () => {
+    const s = document.getElementById("p_sekolah").value.toUpperCase();
+    const u = document.getElementById("p_user").value.toUpperCase();
+    const p = document.getElementById("p_pass").value;
+
+    if(!s || !u || !p) return alert("Isi semua data proktor!");
+
+    const data = { sekolah: s, userID: u, password: p, nama: "Proktor " + s };
+
+    if(currentProktorId) {
+        update(ref(db, `proktor_tka/${currentProktorId}`), data).then(() => {
+            alert("✅ Data Proktor Berhasil Diupdate!");
+            resetAdminForm();
+        });
+    } else {
+        push(ref(db, "proktor_tka"), data).then(() => {
+            alert("✅ Proktor Berhasil Didaftarkan!");
+            resetAdminForm();
+        });
+    }
+}
+
+function loadProktorList() {
+    onValue(ref(db, "proktor_tka"), snap => {
+        let html = "";
+        Object.entries(snap.val() || {}).forEach(([id, p]) => {
+            html += `<tr class="border-b">
+                <td class="p-2">${p.sekolah}</td>
+                <td class="p-2">${p.userID}</td>
+                <td class="p-2 space-x-2">
+                    <button onclick="editProktor('${id}','${p.sekolah}','${p.userID}','${p.password}')" class="text-blue-600 font-bold">EDIT</button>
+                    <button onclick="hapusProktor('${id}')" class="text-red-600 font-bold">X</button>
+                </td>
+            </tr>`;
+        });
+        document.getElementById("listProktorTable").innerHTML = html;
+    });
+}
+
+window.editProktor = (id, sek, usr, pas) => {
+    document.getElementById("p_sekolah").value = sek;
+    document.getElementById("p_user").value = usr;
+    document.getElementById("p_pass").value = pas;
+    document.getElementById("btnProktor").innerText = "SIMPAN PERUBAHAN";
+    currentProktorId = id;
+};
+
+window.hapusProktor = (id) => {
+    if(confirm("Hapus proktor ini?")) remove(ref(db, `proktor_tka/${id}`));
+}
+
+function resetAdminForm() {
+    currentProktorId = null;
+    document.getElementById("p_sekolah").value = "";
+    document.getElementById("p_user").value = "";
+    document.getElementById("p_pass").value = "";
+    document.getElementById("btnProktor").innerText = "DAFTARKAN PROKTOR";
+}
+
 window.tambahSoal = () => {
     const data = {
         tanya: document.getElementById("q_tanya").value,
