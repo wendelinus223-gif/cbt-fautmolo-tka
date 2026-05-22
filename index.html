@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CBT TKA FAUTMOLO - Simulasi Literasi & Numerasi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f8fafc; }
+        .glass { background: white; border-radius: 16px; border: 1px solid #e2e8f0; }
+        .hidden { display: none; }
+        input, select { border: 1px solid #cbd5e1 !important; border-radius: 8px !important; padding: 10px !important; width: 100%; font-size: 14px; }
+        
+        /* Area Cetak */
+        @media print {
+            body * { visibility: hidden; }
+            #printArea, #printArea * { visibility: visible; }
+            #printArea { position: absolute; left: 0; top: 0; width: 100%; display: block !important; }
+            .card-print { page-break-inside: avoid; border: 2px solid #000 !important; margin-bottom: 20px !important; }
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800">
+
+<div id="loginPage" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900 p-4">
+    <div class="glass p-8 w-full max-w-md shadow-2xl text-center">
+        <div class="mb-6">
+            <h2 class="text-2xl font-bold text-blue-600 uppercase tracking-tight">CBT TKA FAUTMOLO</h2>
+            <p class="text-xs text-slate-500 font-bold uppercase italic">Simulasi Literasi & Numerasi</p>
+        </div>
+        <div class="space-y-4 text-left">
+            <div>
+                <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Username / No. Peserta</label>
+                <input type="text" id="l_user" placeholder="Masukkan ID">
+            </div>
+            <div>
+                <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Password</label>
+                <input type="password" id="l_pass" placeholder="******">
+            </div>
+            <button onclick="prosesLogin()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 shadow-lg transition uppercase tracking-wider text-sm">Masuk ke Sistem</button>
+        </div>
+        <p class="mt-8 text-[9px] text-slate-400 uppercase font-bold tracking-widest border-t pt-4">Admin Utama: Wendelinus Christo Snae, SE</p>
+    </div>
+</div>
+
+<div id="mainDashboard" class="hidden">
+    <nav class="bg-white border-b p-4 sticky top-0 z-40 shadow-sm">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex flex-col">
+                <span class="font-bold text-blue-600 text-sm leading-tight">CBT TKA FAUTMOLO</span>
+                <span id="displaySekolah" class="text-[10px] font-bold text-slate-400 uppercase">...</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="text-right hidden md:block">
+                    <p id="userNama" class="text-xs font-bold uppercase"></p>
+                    <p id="userRole" class="text-[9px] text-blue-500 font-bold uppercase"></p>
+                </div>
+                <button onclick="location.reload()" class="bg-red-50 text-red-600 p-2 rounded-lg hover:bg-red-100 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto p-4 lg:p-8">
+        
+        <div id="superAdminSection" class="hidden space-y-6">
+            <div class="glass p-6 border-l-4 border-orange-500 shadow-sm">
+                <h3 class="font-bold text-slate-700 mb-4 flex items-center gap-2 italic text-sm">🔑 KONTROL PROKTOR LEMBAGA (KECAMATAN)</h3>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <input type="text" id="p_sekolah" placeholder="Nama Sekolah (SDN ...)">
+                    <input type="text" id="p_user" placeholder="ID Login Proktor">
+                    <input type="text" id="p_pass" placeholder="Password Proktor">
+                    <button onclick="tambahProktor()" class="bg-orange-500 text-white font-bold rounded-lg px-4 py-2 hover:bg-orange-600 transition text-sm">DAFTARKAN PROKTOR</button>
+                </div>
+                <div class="mt-6 overflow-x-auto">
+                    <table class="w-full text-xs text-left">
+                        <thead class="bg-slate-100 uppercase">
+                            <tr><th class="p-3">Sekolah</th><th class="p-3">ID Proktor</th><th class="p-3">Password</th><th class="p-3">Aksi</th></tr>
+                        </thead>
+                        <tbody id="listProktorTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="proktorSection" class="hidden space-y-6">
+            <div class="glass p-6 border-l-4 border-blue-600 shadow-sm">
+                <h3 class="font-bold text-slate-700 mb-4 flex items-center gap-2 text-sm uppercase tracking-wider">🏢 Identitas Lembaga & Foto</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <input type="text" id="c_kepsek" placeholder="Nama Kepala Sekolah">
+                    <input type="text" id="c_folder" placeholder="Link Folder Foto GitHub Sekolah Ini">
+                    <button onclick="simpanConfigProktor()" class="bg-blue-600 text-white font-bold rounded-lg px-4 py-2 hover:bg-blue-700 transition text-sm">SIMPAN DATA</button>
+                </div>
+            </div>
+
+            <div class="glass p-6 border-l-4 border-emerald-500 shadow-sm">
+                <h3 class="font-bold text-slate-700 mb-4 flex items-center gap-2 text-sm uppercase tracking-wider">👥 Data Peserta Siswa</h3>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <input type="text" id="s_no" placeholder="Nomor Peserta">
+                    <input type="text" id="s_nama" placeholder="Nama Lengkap Siswa">
+                    <input type="text" id="s_pass" placeholder="Password Siswa">
+                    <button onclick="tambahSiswa()" class="bg-emerald-600 text-white font-bold rounded-lg px-4 py-2 hover:bg-emerald-700 transition text-sm">TAMBAH SISWA</button>
+                </div>
+                <div class="mt-6 flex justify-between items-center bg-slate-50 p-4 rounded-xl border border-dashed border-slate-300">
+                    <p class="text-xs font-bold text-slate-500 uppercase">Total Peserta Terdaftar: <span id="countSiswa" class="text-blue-600">0</span></p>
+                    <button onclick="printKartu()" class="bg-slate-800 text-white px-6 py-2 rounded-xl text-xs font-bold uppercase hover:bg-black transition">🖨️ Cetak Kartu Sekolah</button>
+                </div>
+                <div class="mt-4 overflow-x-auto max-h-96">
+                    <table class="w-full text-xs text-left">
+                        <thead class="bg-slate-100 uppercase sticky top-0">
+                            <tr><th class="p-3">No. Peserta</th><th class="p-3">Nama Lengkap</th><th class="p-3">Pass</th><th class="p-3 text-center">Aksi</th></tr>
+                        </thead>
+                        <tbody id="listSiswaProktorTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="siswaSection" class="hidden">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="gridUjianSiswa">
+                </div>
+        </div>
+    </main>
+</div>
+
+<div id="printArea" class="hidden"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, set, push, onValue, remove, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyA4_3IPW8BAWmBBSwYei4A7KE1AsLP9C-8",
+    authDomain: "guru-rpgo.firebaseapp.com",
+    databaseURL: "https://guru-rpgo-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "guru-rpgo",
+    storageBucket: "guru-rpgo.firebasestorage.app",
+    appId: "1:475490673231:web:a85fccf2eb86e9ace1c03a"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+let currentUser = null; // Menyimpan data siapa yang login
+
+// FUNGSI LOGIN MULTI-LEVEL
+window.prosesLogin = async () => {
+    const user = document.getElementById("l_user").value.trim().toUpperCase();
+    const pass = document.getElementById("l_pass").value;
+
+    // 1. Check Super Admin (Bapak)
+    if(user === "AMADEO" && pass === "FAUTMOLO2026") {
+        renderDashboard({ nama: "WENDELINUS CHRISTO SNAE, SE", role: "super_admin", sekolah: "KECAMATAN FAUTMOLO" });
+        return;
+    }
+
+    // 2. Check Database Proktor
+    const proktorSnap = await get(ref(db, "proktor_tka"));
+    let foundProktor = null;
+    Object.values(proktorSnap.val() || {}).forEach(p => {
+        if(p.userID === user && p.password === pass) foundProktor = p;
+    });
+
+    if(foundProktor) {
+        renderDashboard({ ...foundProktor, role: "proktor" });
+        return;
+    }
+
+    // 3. Check Database Siswa
+    const siswaSnap = await get(ref(db, "siswa_tka"));
+    let foundSiswa = null;
+    Object.values(siswaSnap.val() || {}).forEach(s => {
+        if(s.noPeserta === user && s.password === pass) foundSiswa = s;
+    });
+
+    if(foundSiswa) {
+        renderDashboard({ ...foundSiswa, role: "siswa" });
+        return;
+    }
+
+    alert("User ID atau Password Salah!");
+};
+
+function renderDashboard(data) {
+    currentUser = data;
+    document.getElementById("loginPage").classList.add("hidden");
+    document.getElementById("mainDashboard").classList.remove("hidden");
+    document.getElementById("userNama").innerText = data.nama;
+    document.getElementById("userRole").innerText = data.role.replace("_", " ");
+    document.getElementById("displaySekolah").innerText = data.sekolah;
+
+    if(data.role === 'super_admin') {
+        document.getElementById("superAdminSection").classList.remove("hidden");
+        loadSuperAdminData();
+    } else if(data.role === 'proktor') {
+        document.getElementById("proktorSection").classList.remove("hidden");
+        loadProktorData(data.sekolah);
+    } else {
+        document.getElementById("siswaSection").classList.remove("hidden");
+        // Load Ujian Siswa
+    }
+}
+
+// LOGIKA SUPER ADMIN (MANAJEMEN PROKTOR)
+window.tambahProktor = () => {
+    const sekolah = document.getElementById("p_sekolah").value.trim().toUpperCase();
+    const userID = document.getElementById("p_user").value.trim().toUpperCase();
+    const password = document.getElementById("p_pass").value;
+
+    if(!sekolah || !userID) return alert("Lengkapi data!");
+    push(ref(db, "proktor_tka"), { sekolah, userID, password, nama: "PROKTOR " + sekolah });
+    alert("Proktor Berhasil Didaftarkan!");
+};
+
+function loadSuperAdminData() {
+    onValue(ref(db, "proktor_tka"), snap => {
+        let h = "";
+        Object.entries(snap.val() || {}).forEach(([key, p]) => {
+            h += `<tr class="border-b">
+                <td class="p-3 font-bold text-blue-600">${p.sekolah}</td>
+                <td class="p-3 font-mono">${p.userID}</td>
+                <td class="p-3">${p.password}</td>
+                <td class="p-3 text-center"><button onclick="hapusData('proktor_tka/${key}')" class="text-red-500 text-[10px] font-bold">HAPUS</button></td>
+            </tr>`;
+        });
+        document.getElementById("listProktorTable").innerHTML = h;
+    });
+}
+
+// LOGIKA PROKTOR (MANAJEMEN SISWA SEKOLAH SENDIRI)
+window.simpanConfigProktor = () => {
+    const kepsek = document.getElementById("c_kepsek").value.trim().toUpperCase();
+    const folder = document.getElementById("c_folder").value.trim();
+    set(ref(db, `config_sekolah/${currentUser.sekolah.replace(/\s/g, "_")}`), { kepsek, folder });
+    alert("Data Sekolah Disimpan!");
+};
+
+window.tambahSiswa = () => {
+    const s = {
+        noPeserta: document.getElementById("s_no").value.trim().toUpperCase(),
+        nama: document.getElementById("s_nama").value.trim().toUpperCase(),
+        password: document.getElementById("s_pass").value,
+        sekolah: currentUser.sekolah
+    };
+    if(!s.noPeserta || !s.nama) return alert("Isi Nama & No. Peserta!");
+    push(ref(db, "siswa_tka"), s);
+    document.getElementById("s_no").value = ""; document.getElementById("s_nama").value = "";
+};
+
+function loadProktorData(namaSekolah) {
+    // Load Config Sekolah
+    onValue(ref(db, `config_sekolah/${namaSekolah.replace(/\s/g, "_")}`), snap => {
+        if(snap.exists()){
+            document.getElementById("c_kepsek").value = snap.val().kepsek || "";
+            document.getElementById("c_folder").value = snap.val().folder || "";
+        }
+    });
+
+    // Load Siswa Khusus Sekolah Tersebut
+    onValue(ref(db, "siswa_tka"), snap => {
+        let h = ""; let count = 0;
+        Object.entries(snap.val() || {}).forEach(([key, s]) => {
+            if(s.sekolah === namaSekolah) {
+                count++;
+                h += `<tr class="border-b hover:bg-slate-50">
+                    <td class="p-3 font-mono font-bold">${s.noPeserta}</td>
+                    <td class="p-3">${s.nama}</td>
+                    <td class="p-3 text-slate-400">${s.password}</td>
+                    <td class="p-3 text-center"><button onclick="hapusData('siswa_tka/${key}')" class="text-red-400">Hapus</button></td>
+                </tr>`;
+            }
+        });
+        document.getElementById("listSiswaProktorTable").innerHTML = h;
+        document.getElementById("countSiswa").innerText = count;
+    });
+}
+
+window.hapusData = (path) => confirm("Yakin hapus?") && remove(ref(db, path));
+
+// FUNGSI CETAK KARTU (OTOMATIS SESUAI DATA PROKTOR)
+window.printKartu = async () => {
+    const configSnap = await get(ref(db, `config_sekolah/${currentUser.sekolah.replace(/\s/g, "_")}`));
+    const conf = configSnap.val() || {};
+    const siswaSnap = await get(ref(db, "siswa_tka"));
+    
+    let html = "";
+    Object.values(siswaSnap.val() || {}).forEach(s => {
+        if(s.sekolah === currentUser.sekolah) {
+            let linkFoto = conf.folder ? (conf.folder.endsWith('/') ? conf.folder : conf.folder + '/') + s.noPeserta + ".jpeg" : "";
+            
+            html += `<div class="card-print" style="border: 2px solid #000; padding: 10px; width: 48%; float: left; margin: 1%; height: 280px; box-sizing: border-box; position: relative; font-family: Arial; background: #fff;">
+                <div style="text-align: center; border-bottom: 3px double #000; padding-bottom: 5px; margin-bottom: 10px;">
+                    <div style="font-size: 11px; font-weight: bold;">KARTU SIMULASI TKA 2026</div>
+                    <div style="font-size: 10px; font-weight: bold; color: #2563eb;">KECAMATAN FAUTMOLO</div>
+                </div>
+                <table style="font-size: 10px; width: 100%; font-weight: bold;">
+                    <tr><td width="35%">SEKOLAH</td><td>: ${s.sekolah}</td></tr>
+                    <tr><td>NO. PESERTA</td><td>: ${s.noPeserta}</td></tr>
+                    <tr><td>NAMA</td><td style="text-transform: uppercase;">: ${s.nama}</td></tr>
+                    <tr><td>PASSWORD</td><td>: ${s.password}</td></tr>
+                </table>
+                <div style="margin-top: 20px; display: flex; justify-content: space-between;">
+                    <div style="width: 70px; height: 90px; border: 1px solid #000; display: flex; align-items: center; justify-content: center; background: #f0f0f0;">
+                        <img src="${linkFoto}" onerror="this.style.display='none';" style="width: 100%; height: 100%; object-fit: cover;">
+                        <span style="font-size: 7px; color: #ccc">3x4</span>
+                    </div>
+                    <div style="text-align: center; width: 160px;">
+                        <div style="font-size: 9px; font-weight: bold;">FAUTMOLO, MEI 2026</div>
+                        <div style="font-size: 9px; font-weight: bold; margin-bottom: 35px;">KEPALA SEKOLAH</div>
+                        <div style="font-size: 9px; font-weight: bold; text-decoration: underline;">${conf.kepsek || '..........................'}</div>
+                    </div>
+                </div>
+            </div>`;
+        }
+    });
+
+    const pArea = document.getElementById("printArea");
+    pArea.innerHTML = html;
+    pArea.classList.remove("hidden");
+    setTimeout(() => { window.print(); pArea.classList.add("hidden"); }, 1000);
+};
+
+</script>
+</body>
+</html>
