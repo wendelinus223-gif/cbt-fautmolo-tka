@@ -3,114 +3,150 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CBT TKA FAUTMOLO - Versi 2.0</title>
+    <title>CBT TKA FAUTMOLO - BY WENDELINUS CHRISTO SNAE, SE</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f1f5f9; }
-        .glass { background: white; border-radius: 16px; border: 1px solid #e2e8f0; }
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #1e293b; }
+        .glass { background: rgba(255, 255, 255, 0.95); border-radius: 20px; border: 1px solid #e2e8f0; backdrop-filter: blur(10px); }
         .hidden { display: none; }
-        input, select, textarea { border: 1px solid #cbd5e1 !important; border-radius: 8px !important; padding: 10px !important; width: 100%; font-size: 14px; }
-        .btn-primary { background: #2563eb; color: white; font-weight: bold; padding: 10px 20px; border-radius: 10px; transition: 0.3s; }
-        .btn-primary:hover { background: #1d4ed8; transform: translateY(-2px); }
+        input, select, textarea { border: 1.5px solid #cbd5e1 !important; border-radius: 12px !important; padding: 12px !important; width: 100%; font-size: 14px; transition: 0.2s; }
+        input:focus { border-color: #2563eb !important; outline: none; box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); }
+        .btn-primary { background: #1e40af; color: white; font-weight: 700; padding: 12px 24px; border-radius: 12px; transition: 0.3s; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        .btn-primary:hover { background: #1e3a8a; transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .owner-badge { background: linear-gradient(135deg, #1e293b 0%, #334155 100%); color: #f1f5f9; padding: 10px 20px; border-radius: 50px; font-size: 11px; font-weight: 800; letter-spacing: 1px; display: inline-block; }
+        .soal-img { max-width: 100%; border-radius: 12px; margin: 15px 0; border: 2px solid #e2e8f0; }
     </style>
 </head>
 <body class="min-h-screen">
 
-<div id="loginPage" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900 p-4">
-    <div class="glass p-8 w-full max-w-md shadow-2xl text-center">
-        <h2 class="text-2xl font-bold text-blue-600 mb-6 uppercase">CBT TKA FAUTMOLO</h2>
+<div id="loginPage" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#0f172a] p-4">
+    <div class="glass p-10 w-full max-w-md shadow-2xl text-center relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-2 bg-blue-600"></div>
+        <h1 class="text-3xl font-black text-slate-800 mb-2">CBT TKA</h1>
+        <p class="text-blue-600 font-bold tracking-[0.2em] text-xs mb-8">KECAMATAN FAUTMOLO</p>
+        
         <div class="space-y-4 text-left">
-            <input type="text" id="l_user" placeholder="Username / No. Peserta">
-            <input type="password" id="l_pass" placeholder="Password">
-            <button onclick="prosesLogin()" class="w-full btn-primary uppercase tracking-widest">Login</button>
+            <div>
+                <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Akses Pengguna</label>
+                <input type="text" id="l_user" placeholder="Username / No. Peserta">
+            </div>
+            <div>
+                <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Kata Sandi</label>
+                <input type="password" id="l_pass" placeholder="Password">
+            </div>
+            <button onclick="prosesLogin()" class="w-full btn-primary uppercase text-sm tracking-widest mt-4">Masuk ke Sistem</button>
+        </div>
+
+        <div class="mt-10 pt-6 border-t border-slate-100 text-center">
+            <p class="text-[9px] text-slate-400 uppercase mb-2 font-bold tracking-widest">Aplikasi Resmi Milik:</p>
+            <div class="owner-badge uppercase">WENDELINUS CHRISTO SNAE, SE</div>
         </div>
     </div>
+    <p class="mt-6 text-slate-500 text-[10px] font-medium italic">© 2026 All Rights Reserved. Teknologi Pendidikan Fautmolo.</p>
 </div>
 
 <div id="mainApp" class="hidden">
-    <nav class="bg-white border-b p-4 sticky top-0 z-40 shadow-sm">
+    <nav class="bg-white/80 backdrop-blur-md border-b p-4 sticky top-0 z-40">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <div>
-                <span id="displaySekolah" class="font-bold text-blue-600">FAUTMOLO</span>
-                <p id="userNama" class="text-[10px] text-slate-500 uppercase font-bold tracking-widest"></p>
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white font-black">F</div>
+                <div>
+                    <span id="displaySekolah" class="font-black text-slate-800 text-lg leading-none">FAUTMOLO</span>
+                    <p id="userNama" class="text-[9px] text-blue-600 font-bold uppercase tracking-wider"></p>
+                </div>
             </div>
-            <button onclick="location.reload()" class="bg-red-100 text-red-600 px-3 py-1 rounded text-xs font-bold uppercase">Logout</button>
+            <button onclick="location.reload()" class="bg-slate-100 text-slate-600 px-4 py-2 rounded-xl text-[10px] font-extrabold uppercase hover:bg-red-50 hover:text-red-600 transition">Keluar</button>
         </div>
     </nav>
 
-    <main class="max-w-7xl mx-auto p-4">
+    <main class="max-w-7xl mx-auto p-6">
         
-        <div id="superAdminSection" class="hidden space-y-6">
-            <div class="glass p-6 border-l-4 border-orange-500">
-                <h3 class="font-bold mb-4 text-sm uppercase">🔑 Daftar Proktor Sekolah</h3>
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-                    <input type="text" id="p_sekolah" placeholder="Nama Sekolah">
-                    <input type="text" id="p_user" placeholder="ID Login">
-                    <input type="text" id="p_pass" placeholder="Password">
-                    <button onclick="tambahProktor()" class="btn-primary text-xs">Tambah Proktor</button>
+        <div id="superAdminSection" class="hidden space-y-8">
+            <div class="bg-blue-600 rounded-3xl p-8 text-white shadow-xl shadow-blue-200">
+                <h2 class="text-2xl font-bold italic">"Pendidikan adalah senjata paling mematikan di dunia."</h2>
+                <p class="mt-2 text-blue-100 font-medium">Selamat Bekerja, Pak <b>Wendelinus Christo Snae, SE</b></p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="glass p-8">
+                    <h3 class="font-bold mb-6 flex items-center gap-2 text-slate-700">
+                        <span class="p-2 bg-orange-100 text-orange-600 rounded-lg">🔑</span> 
+                        MANAJEMEN PROKTOR
+                    </h3>
+                    <div class="space-y-4">
+                        <input type="text" id="p_sekolah" placeholder="Nama Lembaga/Sekolah">
+                        <input type="text" id="p_user" placeholder="User ID">
+                        <input type="text" id="p_pass" placeholder="Password">
+                        <button onclick="tambahProktor()" class="w-full btn-primary text-xs">DAFTARKAN PROKTOR</button>
+                    </div>
+                </div>
+
+                <div class="glass p-8">
+                    <h3 class="font-bold mb-6 flex items-center gap-2 text-slate-700">
+                        <span class="p-2 bg-purple-100 text-purple-600 rounded-lg">📝</span> 
+                        BANK SOAL KECAMATAN
+                    </h3>
+                    <div class="space-y-4">
+                        <textarea id="q_tanya" rows="3" placeholder="Teks Pertanyaan..."></textarea>
+                        <input type="text" id="q_img" placeholder="Link Gambar Soal (Kosongkan jika tidak ada)">
+                        <div class="grid grid-cols-2 gap-3">
+                            <input type="text" id="q_a" placeholder="Opsi A">
+                            <input type="text" id="q_b" placeholder="Opsi B">
+                            <input type="text" id="q_c" placeholder="Opsi C">
+                            <input type="text" id="q_d" placeholder="Opsi D">
+                        </div>
+                        <select id="q_kunci">
+                            <option value="">-- Kunci Jawaban --</option>
+                            <option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option>
+                        </select>
+                        <button onclick="tambahSoal()" class="w-full bg-purple-600 text-white font-bold py-3 rounded-xl hover:bg-purple-700 transition">SIMPAN SOAL KE DATABASE</button>
+                    </div>
                 </div>
             </div>
 
-            <div class="glass p-6 border-l-4 border-purple-500">
-                <h3 class="font-bold mb-4 text-sm uppercase">📝 Bank Soal Kecamatan</h3>
-                <div class="space-y-4">
-                    <textarea id="q_tanya" placeholder="Pertanyaan Soal..."></textarea>
-                    <div class="grid grid-cols-2 gap-2">
-                        <input type="text" id="q_a" placeholder="Opsi A">
-                        <input type="text" id="q_b" placeholder="Opsi B">
-                        <input type="text" id="q_c" placeholder="Opsi C">
-                        <input type="text" id="q_d" placeholder="Opsi D">
-                    </div>
-                    <select id="q_kunci">
-                        <option value="">-- Pilih Kunci Jawaban --</option>
-                        <option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option>
-                    </select>
-                    <button onclick="tambahSoal()" class="w-full bg-purple-600 text-white font-bold py-2 rounded-lg">SIMPAN SOAL</button>
-                </div>
-                <div class="mt-6 border-t pt-4">
-                    <h4 class="text-xs font-bold mb-2">Total Soal: <span id="countSoal">0</span></h4>
-                    <div id="listSoalAdmin" class="space-y-2 max-h-60 overflow-y-auto"></div>
-                </div>
+            <div class="glass p-8">
+                <h4 class="text-sm font-black mb-4 uppercase text-slate-500">Daftar Soal Aktif: <span id="countSoal" class="text-blue-600">0</span></h4>
+                <div id="listSoalAdmin" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
             </div>
         </div>
 
         <div id="proktorSection" class="hidden space-y-6">
-            <div class="glass p-6 border-l-4 border-emerald-500">
-                <h3 class="font-bold mb-4 text-sm uppercase">👥 Data Peserta Siswa</h3>
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+            <div class="glass p-8">
+                <h3 class="font-bold mb-6 text-slate-700 uppercase tracking-wider">Pendaftaran Peserta Ujian</h3>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <input type="text" id="s_no" placeholder="No. Peserta">
-                    <input type="text" id="s_nama" placeholder="Nama Siswa">
-                    <input type="text" id="s_pass" placeholder="Pass Siswa">
-                    <button onclick="tambahSiswa()" class="btn-primary text-xs">Tambah</button>
+                    <input type="text" id="s_nama" placeholder="Nama Lengkap">
+                    <input type="text" id="s_pass" placeholder="Password">
+                    <button onclick="tambahSiswa()" class="btn-primary text-xs">SIMPAN DATA</button>
                 </div>
-                <div class="mt-6 overflow-x-auto">
-                    <table class="w-full text-xs text-left">
-                        <thead class="bg-slate-100 uppercase font-bold">
-                            <tr><th class="p-2">No. Peserta</th><th class="p-2">Nama</th><th class="p-2">Hasil Ujian</th><th class="p-2">Aksi</th></tr>
+                <div class="mt-10 overflow-hidden rounded-2xl border border-slate-100 shadow-sm">
+                    <table class="w-full text-sm text-left">
+                        <thead class="bg-slate-50 text-slate-400 uppercase text-[10px] font-black">
+                            <tr><th class="p-4">No. Peserta</th><th class="p-4">Nama Siswa</th><th class="p-4">Skor Ujian</th><th class="p-4 text-center">Aksi</th></tr>
                         </thead>
-                        <tbody id="listSiswaTable"></tbody>
+                        <tbody id="listSiswaTable" class="divide-y divide-slate-100"></tbody>
                     </table>
                 </div>
             </div>
         </div>
 
         <div id="siswaSection" class="hidden">
-            <div id="areaUjian" class="max-w-2xl mx-auto space-y-6">
-                <div class="glass p-4 flex justify-between bg-blue-50">
-                    <span class="text-xs font-bold uppercase">Siswa: <span id="namaSiswaUjian"></span></span>
-                    <span class="text-xs font-bold text-blue-600 uppercase">WAKTU BERJALAN</span>
+            <div id="areaUjian" class="max-w-3xl mx-auto space-y-6">
+                <div class="glass p-5 flex justify-between items-center bg-blue-600 text-white border-none shadow-lg">
+                    <span class="text-xs font-black uppercase">PESERTA: <span id="namaSiswaUjian"></span></span>
+                    <div class="bg-blue-500 px-4 py-1 rounded-full text-[10px] font-bold">UJIAN SEDANG BERLANGSUNG</div>
                 </div>
                 
-                <div id="containerSoal">
-                    </div>
+                <div id="containerSoal" class="min-h-[400px]"></div>
             </div>
             
-            <div id="areaSelesai" class="hidden text-center glass p-10 max-w-md mx-auto">
-                <h2 class="text-3xl font-bold text-green-600 mb-2">SELESAI!</h2>
-                <p class="text-slate-500 mb-6 uppercase text-xs font-bold tracking-widest">Nilai Kamu Telah Tersimpan</p>
-                <div class="text-5xl font-black mb-6" id="skorAkhir">0</div>
-                <button onclick="location.reload()" class="btn-primary w-full">Keluar</button>
+            <div id="areaSelesai" class="hidden text-center glass p-16 max-w-lg mx-auto shadow-2xl">
+                <div class="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl">✓</div>
+                <h2 class="text-3xl font-black text-slate-800 mb-2">UJIAN SELESAI</h2>
+                <p class="text-slate-400 mb-8 uppercase text-[10px] font-bold tracking-widest">Terima kasih telah mengikuti simulasi</p>
+                <div class="text-7xl font-black text-blue-600 mb-8" id="skorAkhir">0</div>
+                <button onclick="location.reload()" class="btn-primary w-full">KEMBALI KE HALAMAN LOGIN</button>
             </div>
         </div>
 
@@ -123,10 +159,10 @@ import { getDatabase, ref, set, push, onValue, remove, get } from "https://www.g
 
 const firebaseConfig = {
     apiKey: "AIzaSyA4_3IPW8BAWmBBSwYei4A7KE1AsLP9C-8",
-    authDomain: "guru-rpgo.firebaseapp.com",
+    authDomain: "guru-rpgo.firebaseapp.app",
     databaseURL: "https://guru-rpgo-default-rtdb.asia-southeast1.firebasedatabase.app",
     projectId: "guru-rpgo",
-    storageBucket: "guru-rpgo.firebasestorage.app",
+    storageBucket: "guru-rpgo.appspot.com",
     appId: "1:475490673231:web:a85fccf2eb86e9ace1c03a"
 };
 
@@ -155,7 +191,7 @@ window.prosesLogin = async () => {
     let sData = Object.values(siswaSnap.val() || {}).find(x => x.noPeserta === u && x.password === p);
     if(sData) return renderDashboard({...sData, role: 'siswa'});
 
-    alert("Login Gagal!");
+    alert("Identitas tidak ditemukan!");
 }
 
 function renderDashboard(data) {
@@ -178,39 +214,48 @@ function renderDashboard(data) {
     }
 }
 
-// BAPAK PUNYA KONTROL (SUPER ADMIN)
+// SUPER ADMIN (PAK WENDELINUS)
 window.tambahProktor = () => {
     const s = document.getElementById("p_sekolah").value.toUpperCase();
     const u = document.getElementById("p_user").value.toUpperCase();
     const p = document.getElementById("p_pass").value;
+    if(!s || !u || !p) return alert("Isi semua data!");
     push(ref(db, "proktor_tka"), { sekolah: s, userID: u, password: p, nama: "PROKTOR " + s });
+    alert("Proktor Lembaga Berhasil Didaftarkan!");
 }
 
 window.tambahSoal = () => {
     const soal = {
         tanya: document.getElementById("q_tanya").value,
+        img: document.getElementById("q_img").value,
         a: document.getElementById("q_a").value,
         b: document.getElementById("q_b").value,
         c: document.getElementById("q_c").value,
         d: document.getElementById("q_d").value,
         kunci: document.getElementById("q_kunci").value
     };
+    if(!soal.tanya || !soal.kunci) return alert("Teks Soal & Kunci wajib diisi!");
     push(ref(db, "bank_soal"), soal);
-    alert("Soal Disimpan!");
+    alert("Soal berhasil masuk ke Bank Soal!");
+    document.getElementById("q_tanya").value = "";
+    document.getElementById("q_img").value = "";
 }
 
 function loadAdminData() {
-    onValue(ref(db, "proktor_tka"), snap => {
-        // Render tabel proktor (Bapak sudah bisa)
-    });
     onValue(ref(db, "bank_soal"), snap => {
         let h = ""; let count = 0;
         Object.entries(snap.val() || {}).forEach(([key, q]) => {
             count++;
-            h += `<div class="p-3 bg-slate-50 rounded border text-xs relative">
-                <p class="font-bold">Q${count}: ${q.tanya}</p>
-                <p class="text-blue-600">Kunci: ${q.kunci}</p>
-                <button onclick="hapusData('bank_soal/${key}')" class="absolute top-2 right-2 text-red-500 font-bold">X</button>
+            h += `<div class="glass p-5 border-l-4 border-blue-600 relative">
+                <p class="text-[10px] font-black text-blue-600 mb-1">SOAL NO. ${count}</p>
+                <p class="font-bold text-sm mb-2">${q.tanya}</p>
+                ${q.img ? `<img src="${q.img}" class="h-20 w-auto rounded border mb-2">` : ''}
+                <div class="grid grid-cols-2 gap-2 text-[10px] text-slate-500 font-medium">
+                    <span>A: ${q.a}</span><span>B: ${q.b}</span>
+                    <span>C: ${q.c}</span><span>D: ${q.d}</span>
+                </div>
+                <div class="mt-2 pt-2 border-t font-black text-green-600 text-xs uppercase">Kunci: ${q.kunci}</div>
+                <button onclick="hapusData('bank_soal/${key}')" class="absolute top-4 right-4 text-red-300 hover:text-red-600 transition">HAPUS</button>
             </div>`;
         });
         document.getElementById("countSoal").innerText = count;
@@ -218,7 +263,7 @@ function loadAdminData() {
     });
 }
 
-// PROKTOR DATA
+// PROKTOR
 window.tambahSiswa = () => {
     const s = {
         noPeserta: document.getElementById("s_no").value.toUpperCase(),
@@ -234,11 +279,11 @@ function loadProktorData() {
         let h = "";
         Object.entries(snap.val() || {}).forEach(([key, s]) => {
             if(s.sekolah === userLogin.sekolah) {
-                h += `<tr class="border-b">
-                    <td class="p-2">${s.noPeserta}</td>
-                    <td class="p-2 font-bold">${s.nama}</td>
-                    <td class="p-2 text-blue-600 font-bold">${s.nilai || 'BELUM UJIAN'}</td>
-                    <td class="p-2"><button onclick="hapusData('siswa_tka/${key}')" class="text-red-500">Hapus</button></td>
+                h += `<tr>
+                    <td class="p-4 font-mono text-xs">${s.noPeserta}</td>
+                    <td class="p-4 font-black text-slate-700">${s.nama}</td>
+                    <td class="p-4"><span class="px-3 py-1 rounded-full bg-blue-50 text-blue-600 font-black text-xs">${s.nilai || 'BELUM UJIAN'}</span></td>
+                    <td class="p-4 text-center"><button onclick="hapusData('siswa_tka/${key}')" class="text-red-400 hover:text-red-600 font-bold">Hapus</button></td>
                 </tr>`;
             }
         });
@@ -246,10 +291,11 @@ function loadProktorData() {
     });
 }
 
-// UJIAN SISWA LOGIC
+// UJIAN SISWA
 async function mulaiUjianSiswa() {
     const snap = await get(ref(db, "bank_soal"));
     databaseSoal = Object.entries(snap.val() || {});
+    if(databaseSoal.length === 0) return alert("Belum ada soal tersedia!");
     renderSoalUjian(0);
 }
 
@@ -261,14 +307,19 @@ function renderSoalUjian(index) {
 
     const [id, q] = databaseSoal[index];
     const html = `
-        <div class="glass p-6 shadow-lg animate-fade-in">
-            <p class="text-xs font-bold text-slate-400 mb-2 uppercase">Pertanyaan ${index + 1} dari ${databaseSoal.length}</p>
-            <p class="text-lg font-bold mb-6">${q.tanya}</p>
-            <div class="space-y-3">
+        <div class="glass p-8 shadow-2xl animate-in slide-in-from-right duration-500">
+            <div class="flex justify-between items-center mb-6">
+                <span class="px-4 py-1 bg-slate-100 text-slate-500 rounded-full text-[10px] font-black uppercase">Soal ${index + 1} / ${databaseSoal.length}</span>
+            </div>
+            <p class="text-xl font-bold leading-relaxed text-slate-800">${q.tanya}</p>
+            
+            ${q.img ? `<img src="${q.img}" class="soal-img" onerror="this.style.display='none'">` : ''}
+
+            <div class="grid grid-cols-1 gap-4 mt-8">
                 ${['A','B','C','D'].map(opt => `
-                    <button onclick="pilihJawaban('${id}', '${opt}', ${index})" class="w-full text-left p-4 rounded-xl border border-slate-200 hover:bg-blue-50 hover:border-blue-300 transition font-medium">
-                        <span class="inline-block w-8 h-8 bg-slate-100 rounded text-center leading-8 mr-3 font-bold text-slate-600">${opt}</span>
-                        ${q[opt.toLowerCase()]}
+                    <button onclick="pilihJawaban('${id}', '${opt}', ${index})" class="group flex items-center w-full text-left p-5 rounded-2xl border-2 border-slate-100 hover:border-blue-600 hover:bg-blue-50 transition-all duration-200">
+                        <span class="w-10 h-10 flex items-center justify-center bg-slate-100 group-hover:bg-blue-600 group-hover:text-white rounded-xl mr-4 font-black transition-colors">${opt}</span>
+                        <span class="font-bold text-slate-600 group-hover:text-blue-700">${q[opt.toLowerCase()]}</span>
                     </button>
                 `).join('')}
             </div>
@@ -290,7 +341,6 @@ async function selesaikanUjian() {
 
     const skor = Math.round((benar / databaseSoal.length) * 100);
     
-    // Simpan Nilai ke Firebase Siswa
     const siswaSnap = await get(ref(db, "siswa_tka"));
     Object.entries(siswaSnap.val()).forEach(([key, s]) => {
         if(s.noPeserta === userLogin.noPeserta) {
@@ -303,7 +353,7 @@ async function selesaikanUjian() {
     document.getElementById("skorAkhir").innerText = skor;
 }
 
-window.hapusData = (path) => confirm("Hapus data ini?") && remove(ref(db, path));
+window.hapusData = (path) => confirm("Yakin ingin menghapus data ini?") && remove(ref(db, path));
 </script>
 </body>
 </html>
