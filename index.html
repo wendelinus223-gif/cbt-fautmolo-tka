@@ -45,7 +45,7 @@
     <nav class="bg-white border-b p-4 sticky top-0 z-40">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white font-black text-xl">F</div>
+                <img id="userFotoNav" src="https://via.placeholder.com/100?text=F" class="w-10 h-10 rounded-xl object-cover border-2 border-blue-100">
                 <div>
                     <span id="displaySekolah" class="font-black text-slate-800 text-lg leading-none uppercase">FAUTMOLO</span>
                     <p id="userNama" class="text-[9px] text-blue-600 font-bold uppercase tracking-wider"></p>
@@ -123,16 +123,17 @@
             
             <div class="glass p-8">
                 <h3 class="font-black mb-6 text-slate-700 uppercase text-xs tracking-widest">👥 Manajemen Siswa</h3>
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-3 mb-6">
                     <input type="text" id="s_no" placeholder="No. Peserta">
                     <input type="text" id="s_nama" placeholder="Nama Siswa">
                     <input type="text" id="s_pass" placeholder="Password">
+                    <input type="text" id="s_foto" placeholder="Link Foto (Drive/GitHub)">
                     <button onclick="tambahSiswa()" class="btn-primary text-[10px] uppercase">Daftarkan</button>
                 </div>
                 <div class="overflow-hidden border rounded-xl">
                     <table class="w-full text-sm text-left">
                         <thead class="bg-slate-50 text-[10px] font-black uppercase">
-                            <tr><th class="p-4">Nama</th><th class="p-4 text-center">Sesi</th><th class="p-4 text-center">Status</th><th class="p-4 text-center">Skor</th></tr>
+                            <tr><th class="p-4">Biodata Siswa</th><th class="p-4 text-center">Sesi</th><th class="p-4 text-center">Status</th><th class="p-4 text-center">Skor</th><th class="p-4 text-right">Aksi</th></tr>
                         </thead>
                         <tbody id="riwayatSkorTable" class="divide-y"></tbody>
                     </table>
@@ -181,6 +182,19 @@ let totalSkorBenar = 0;
 let pasanganSiswa = {};
 let selectedKiri = null;
 
+// KONVERSI LINK FOTO
+function formatLinkFoto(url) {
+    if(!url) return "https://via.placeholder.com/150?text=NO+FOTO";
+    let newUrl = url;
+    if (url.includes("drive.google.com")) {
+        const fileId = url.split('/d/')[1]?.split('/')[0] || url.split('id=')[1];
+        if (fileId) newUrl = `https://lh3.googleusercontent.com/d/$${fileId}`;
+    } else if (url.includes("github.com") && !url.includes("raw.githubusercontent")) {
+        newUrl = url.replace("github.com", "raw.githubusercontent.com").replace("/blob/", "/");
+    }
+    return newUrl;
+}
+
 // LOGIN
 window.prosesLogin = async () => {
     const u = document.getElementById("l_user").value.toUpperCase();
@@ -204,6 +218,7 @@ function renderDashboard(data) {
     document.getElementById("mainApp").classList.remove("hidden");
     document.getElementById("userNama").innerText = data.nama;
     document.getElementById("displaySekolah").innerText = data.sekolah;
+    if(data.foto) document.getElementById("userFotoNav").src = data.foto;
 
     onValue(ref(db, "pengaturan_pusat/sesi_aktif"), (snap) => {
         sesiAktifNasional = snap.val() || "NONAKTIF";
@@ -211,7 +226,6 @@ function renderDashboard(data) {
             document.getElementById("statusSesiSekarang").innerText = sesiAktifNasional;
             document.getElementById("admin_set_sesi").value = sesiAktifNasional;
         }
-        
         if(userLogin.role === 'siswa') cekSesiSiswa();
         if(userLogin.role === 'proktor') loadProktorData();
     });
@@ -229,55 +243,100 @@ function renderDashboard(data) {
     }
 }
 
-// ADMIN ONLY: UNDUH EXCEL PER SEKOLAH
+// CETAK KARTU SISWA
+window.cetakKartu = (nama, no, pass, foto) => {
+    const pWindow = window.open('', '_blank');
+    pWindow.document.write(`
+        <html><head><title>Kartu Peserta</title><script src="https://cdn.tailwindcss.com"></script></head>
+        <body class="p-10 flex justify-center">
+            <div class="w-[380px] border-[4px] border-blue-600 p-6 rounded-3xl relative">
+                <div class="text-center border-b-2 pb-4 mb-4">
+                    <h1 class="font-black text-xl text-blue-700">CBT TKA FAUTMOLO</h1>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase">Kecamatan Fautmolo - 2026</p>
+                </div>
+                <div class="flex gap-5">
+                    <img src="${foto}" class="w-28 h-36 object-cover border-2 rounded-xl shadow-md">
+                    <div class="flex-1 space-y-2">
+                        <div><p class="text-[8px] font-bold text-slate-400 uppercase">No. Peserta</p><p class="font-black text-blue-600">${no}</p></div>
+                        <div><p class="text-[8px] font-bold text-slate-400 uppercase">Nama Siswa</p><p class="font-bold text-slate-800 text-sm">${nama}</p></div>
+                        <div><p class="text-[8px] font-bold text-slate-400 uppercase">Password</p><p class="font-mono bg-slate-100 px-2 py-1 inline-block rounded text-blue-600 font-bold">${pass}</p></div>
+                    </div>
+                </div>
+                <div class="mt-6 text-[8px] text-center italic text-slate-400 border-t pt-2">Simpan kartu ini untuk login Literasi & Numerasi</div>
+                <button onclick="window.print()" class="mt-4 w-full bg-blue-600 text-white py-2 rounded-xl font-bold no-print">PRINT KARTU</button>
+            </div>
+        </body></html>
+    `);
+}
+
+// MANAJEMEN SISWA
+window.tambahSiswa = () => {
+    const data = { 
+        noPeserta: document.getElementById("s_no").value.toUpperCase(), 
+        nama: document.getElementById("s_nama").value.toUpperCase(), 
+        password: document.getElementById("s_pass").value, 
+        sekolah: userLogin.sekolah, 
+        foto: formatLinkFoto(document.getElementById("s_foto").value),
+        selesaiL: false, selesaiN: false, nilaiL: 0, nilaiN: 0 
+    };
+    push(ref(db, "siswa_tka"), data).then(() => {
+        alert("Siswa Berhasil Didaftarkan!");
+        ["s_no","s_nama","s_pass","s_foto"].forEach(id => document.getElementById(id).value = "");
+    });
+}
+
+function loadProktorData() {
+    onValue(ref(db, "siswa_tka"), snap => {
+        let h = "";
+        Object.entries(snap.val() || {}).forEach(([k, s]) => {
+            if(s.sekolah === userLogin.sekolah) {
+                const sAktif = sesiAktifNasional === "NUMERASI" ? "NUMERASI" : "LITERASI";
+                const isSelesai = sAktif === "LITERASI" ? s.selesaiL : s.selesaiN;
+                const skor = sAktif === "LITERASI" ? (s.nilaiL || 0) : (s.nilaiN || 0);
+                const fotoUrl = s.foto || 'https://via.placeholder.com/100';
+                h += `<tr>
+                    <td class="p-4 flex items-center gap-3">
+                        <img src="${fotoUrl}" class="w-10 h-10 rounded-lg object-cover border shadow-sm">
+                        <div><p class="font-bold text-slate-800">${s.nama}</p><p class="text-[9px] font-bold text-slate-400">${s.noPeserta}</p></div>
+                    </td>
+                    <td class="p-4 text-center text-[10px] font-bold">${sAktif}</td>
+                    <td class="p-4 text-center">${isSelesai?'✅':'⏳'}</td>
+                    <td class="p-4 text-center font-black text-blue-600">${skor}</td>
+                    <td class="p-4 text-right">
+                        <button onclick="cetakKartu('${s.nama}', '${s.noPeserta}', '${s.password}', '${fotoUrl}')" class="bg-blue-600 text-white px-3 py-1 rounded-lg text-[9px] font-bold uppercase">Cetak Kartu</button>
+                    </td>
+                </tr>`;
+            }
+        });
+        document.getElementById("riwayatSkorTable").innerHTML = h;
+    });
+}
+
+// FUNGSI LAINNYA (BANK SOAL, EXCEL, DLL)
 window.unduhExcelSekolah = async (namaSekolah) => {
     const snap = await get(ref(db, "siswa_tka"));
-    const dataSiswa = snap.val();
-    if(!dataSiswa) return alert("Belum ada data siswa.");
-
-    const filteredSiswa = Object.values(dataSiswa).filter(s => s.sekolah === namaSekolah);
-    if(filteredSiswa.length === 0) return alert("Belum ada siswa terdaftar di sekolah ini.");
-
-    const rows = [];
-    rows.push(["REKAP NILAI TKA FAUTMOLO"]);
-    rows.push(["SEKOLAH: " + namaSekolah]);
-    rows.push([]);
-    rows.push(["NO", "NO PESERTA", "NAMA SISWA", "LITERASI", "NUMERASI", "RATA-RATA", "STATUS"]);
-
-    filteredSiswa.forEach((s, i) => {
-        const l = s.nilaiL || 0;
-        const n = s.nilaiN || 0;
-        const rata = (l + n) / 2;
-        const status = (s.selesaiL && s.selesaiN) ? "LENGKAP" : "BELUM LENGKAP";
-        rows.push([i+1, s.noPeserta, s.nama, l, n, rata, status]);
-    });
-
+    const filteredSiswa = Object.values(snap.val() || {}).filter(s => s.sekolah === namaSekolah);
+    if(filteredSiswa.length === 0) return alert("Data kosong.");
+    const rows = [["NO", "NO PESERTA", "NAMA SISWA", "LITERASI", "NUMERASI", "RATA-RATA"]];
+    filteredSiswa.forEach((s, i) => rows.push([i+1, s.noPeserta, s.nama, s.nilaiL||0, s.nilaiN||0, ((s.nilaiL||0)+(s.nilaiN||0))/2]));
     const ws = XLSX.utils.aoa_to_sheet(rows);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Laporan");
-    XLSX.writeFile(wb, `LAPORAN_${namaSekolah.replace(/ /g, "_")}.xlsx`);
+    XLSX.writeFile(wb, `LAPORAN_${namaSekolah}.xlsx`);
 }
 
-window.updateSesiNasional = (val) => {
-    set(ref(db, "pengaturan_pusat/sesi_aktif"), val).then(() => {
-        alert("✅ PERHATIAN: Seluruh sistem sekarang beralih ke sesi " + val);
-    });
-}
+window.updateSesiNasional = (val) => set(ref(db, "pengaturan_pusat/sesi_aktif"), val).then(() => alert("Sesi Diperbarui!"));
 
 async function cekSesiSiswa() {
     if(sesiAktifNasional === "NONAKTIF") {
         document.getElementById("areaTunggu").classList.remove("hidden");
         document.getElementById("areaUjian").classList.add("hidden");
-        document.getElementById("areaSelesai").classList.add("hidden");
     } else {
         const fieldSelesai = sesiAktifNasional === "LITERASI" ? 'selesaiL' : 'selesaiN';
         const freshSnap = await get(ref(db, `siswa_tka/${userLogin.dbId}`));
-        const freshData = freshSnap.val();
-        if(freshData[fieldSelesai]) {
-            tampilkanSkorSelesai(freshData[sesiAktifNasional === "LITERASI" ? 'nilaiL' : 'nilaiN']);
-        } else {
+        if(freshSnap.val()[fieldSelesai]) tampilkanSkorSelesai(freshSnap.val()[sesiAktifNasional === "LITERASI" ? 'nilaiL' : 'nilaiN']);
+        else {
             document.getElementById("areaTunggu").classList.add("hidden");
-            document.getElementById("areaSelesai").classList.add("hidden");
             document.getElementById("areaUjian").classList.remove("hidden");
             loadSoalSesi(sesiAktifNasional);
         }
@@ -286,22 +345,17 @@ async function cekSesiSiswa() {
 
 async function loadSoalSesi(sesi) {
     const snap = await get(ref(db, "bank_soal"));
-    const all = Object.values(snap.val() || {});
-    soalUjian = all.filter(s => s.kategori === sesi);
+    soalUjian = Object.values(snap.val() || {}).filter(s => s.kategori === sesi);
     totalSkorBenar = 0;
     if(soalUjian.length > 0) renderSoal(0);
-    else document.getElementById("containerSoal").innerHTML = "<p class='text-center font-bold'>Soal belum tersedia di Bank Soal.</p>";
 }
 
 function renderSoal(idx) {
     if(idx >= soalUjian.length) {
         const skor = Math.round((totalSkorBenar / soalUjian.length) * 100);
         const updates = {};
-        if(sesiAktifNasional === "LITERASI") {
-            updates[`nilaiL`] = skor; updates[`selesaiL`] = true;
-        } else {
-            updates[`nilaiN`] = skor; updates[`selesaiN`] = true;
-        }
+        if(sesiAktifNasional === "LITERASI") { updates[`nilaiL`] = skor; updates[`selesaiL`] = true; }
+        else { updates[`nilaiN`] = skor; updates[`selesaiN`] = true; }
         update(ref(db, `siswa_tka/${userLogin.dbId}`), updates);
         tampilkanSkorSelesai(skor);
         return;
@@ -326,8 +380,8 @@ function tampilkanSkorSelesai(skor) {
     document.getElementById("skorAkhir").innerText = skor || 0;
 }
 
-window.pilihKiri = (val) => { selectedKiri = val; document.querySelectorAll('[id^="L-"]').forEach(el => el.classList.remove('selected-match')); document.getElementById(`L-${val}`).classList.add('selected-match'); };
-window.pilihKanan = (val) => { if(!selectedKiri) return alert("Pilih kiri dulu!"); pasanganSiswa[selectedKiri] = val; document.getElementById(`L-${selectedKiri}`).classList.add('paired-match'); document.getElementById(`R-${val}`).classList.add('paired-match'); selectedKiri = null; };
+window.pilihKiri = (v) => { selectedKiri = v; document.querySelectorAll('[id^="L-"]').forEach(e => e.classList.remove('selected-match')); document.getElementById(`L-${v}`).classList.add('selected-match'); };
+window.pilihKanan = (v) => { if(!selectedKiri) return; pasanganSiswa[selectedKiri] = v; document.getElementById(`L-${selectedKiri}`).classList.add('paired-match'); document.getElementById(`R-${v}`).classList.add('paired-match'); selectedKiri = null; };
 window.cekMatch = (idx) => {
     const q = soalUjian[idx];
     const k = { [q.a.split(':')[0]]:q.a.split(':')[1], [q.b.split(':')[0]]:q.b.split(':')[1], [q.c.split(':')[0]]:q.c.split(':')[1], [q.d.split(':')[0]]:q.d.split(':')[1] };
@@ -335,59 +389,22 @@ window.cekMatch = (idx) => {
     if(b) totalSkorBenar++;
     renderSoal(idx + 1);
 };
-window.prosesNormal = (kunci, idx) => {
-    const terpilih = document.querySelector('input[name="ans"]:checked')?.value;
-    if(!terpilih) return alert("Pilih jawaban!");
-    if(terpilih === kunci) totalSkorBenar++;
+window.prosesNormal = (k, idx) => {
+    const t = document.querySelector('input[name="ans"]:checked')?.value;
+    if(!t) return alert("Pilih jawaban!");
+    if(t === k) totalSkorBenar++;
     renderSoal(idx + 1);
 };
-
-window.simpanKepsek = () => {
-    const n = document.getElementById("s_kepsek").value.toUpperCase();
-    set(ref(db, `info_sekolah/${userLogin.sekolah}`), { kepalaSekolah: n }).then(() => alert("Nama Kepsek Disimpan!"));
-}
-window.tambahSiswa = () => {
-    const data = { noPeserta: document.getElementById("s_no").value.toUpperCase(), nama: document.getElementById("s_nama").value.toUpperCase(), password: document.getElementById("s_pass").value, sekolah: userLogin.sekolah, selesaiL: false, selesaiN: false, nilaiL: 0, nilaiN: 0 };
-    push(ref(db, "siswa_tka"), data).then(() => alert("Siswa Berhasil Didaftarkan!"));
-}
-function loadProktorData() {
-    onValue(ref(db, "siswa_tka"), snap => {
-        let h = "";
-        Object.entries(snap.val() || {}).forEach(([k, s]) => {
-            if(s.sekolah === userLogin.sekolah) {
-                const sAktif = sesiAktifNasional === "NUMERASI" ? "NUMERASI" : "LITERASI";
-                const isSelesai = sAktif === "LITERASI" ? s.selesaiL : s.selesaiN;
-                const skor = sAktif === "LITERASI" ? (s.nilaiL || 0) : (s.nilaiN || 0);
-                h += `<tr><td class="p-4 font-bold">${s.nama}</td><td class="p-4 text-center text-[10px] font-bold">${sAktif}</td><td class="p-4 text-center">${isSelesai?'✅':'⏳'}</td><td class="p-4 text-center font-black text-blue-600">${skor}</td></tr>`;
-            }
-        });
-        document.getElementById("riwayatSkorTable").innerHTML = h;
-    });
-}
-
-window.tambahProktor = () => {
-    const data = { sekolah: document.getElementById("p_sekolah").value.toUpperCase(), userID: document.getElementById("p_user").value.toUpperCase(), password: document.getElementById("p_pass").value, nama: "PROKTOR" };
-    push(ref(db, "proktor_tka"), data).then(() => alert("Proktor Terdaftar!"));
-}
+window.simpanKepsek = () => set(ref(db, `info_sekolah/${userLogin.sekolah}`), { kepalaSekolah: document.getElementById("s_kepsek").value.toUpperCase() }).then(() => alert("Tersimpan!"));
+window.tambahProktor = () => push(ref(db, "proktor_tka"), { sekolah: document.getElementById("p_sekolah").value.toUpperCase(), userID: document.getElementById("p_user").value.toUpperCase(), password: document.getElementById("p_pass").value, nama: "PROKTOR" }).then(() => alert("Terdaftar!"));
 function loadProktorList() {
     onValue(ref(db, "proktor_tka"), snap => {
         let h = "";
-        Object.entries(snap.val() || {}).forEach(([id, p]) => {
-            h += `<tr class="border-b">
-                    <td class="p-3 font-bold">${p.sekolah}</td>
-                    <td class="p-3 flex justify-center gap-2">
-                        <button onclick="unduhExcelSekolah('${p.sekolah}')" class="bg-green-600 text-white px-3 py-1 rounded-lg text-[10px] font-bold hover:bg-green-700 transition">UNDUH EXCEL</button>
-                        <button onclick="remove(ref(db,'proktor_tka/${id}'))" class="bg-red-500 text-white px-3 py-1 rounded-lg text-[10px] font-bold hover:bg-red-600 transition">HAPUS</button>
-                    </td>
-                  </tr>`;
-        });
+        Object.entries(snap.val() || {}).forEach(([id, p]) => h += `<tr class="border-b"><td class="p-3 font-bold">${p.sekolah}</td><td class="p-3 flex justify-center gap-2"><button onclick="unduhExcelSekolah('${p.sekolah}')" class="bg-green-600 text-white px-3 py-1 rounded-lg text-[10px]">EXCEL</button><button onclick="remove(ref(db,'proktor_tka/${id}'))" class="bg-red-500 text-white px-3 py-1 rounded-lg text-[10px]">HAPUS</button></td></tr>`);
         document.getElementById("listProktorTable").innerHTML = h;
     });
 }
-window.tambahSoal = () => {
-    const data = { kategori: document.getElementById("q_kategori").value, tanya: document.getElementById("q_tanya").value, a: document.getElementById("q_a").value, b: document.getElementById("q_b").value, c: document.getElementById("q_c").value, d: document.getElementById("q_d").value, kunci: document.getElementById("q_kunci").value.toUpperCase() };
-    push(ref(db, "bank_soal"), data).then(() => alert("Soal Berhasil Masuk Bank Soal!"));
-}
+window.tambahSoal = () => push(ref(db, "bank_soal"), { kategori: document.getElementById("q_kategori").value, tanya: document.getElementById("q_tanya").value, a: document.getElementById("q_a").value, b: document.getElementById("q_b").value, c: document.getElementById("q_c").value, d: document.getElementById("q_d").value, kunci: document.getElementById("q_kunci").value.toUpperCase() }).then(() => alert("Soal Tersimpan!"));
 </script>
 </body>
 </html>
